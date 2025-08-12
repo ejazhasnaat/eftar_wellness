@@ -305,31 +305,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create your account')),
-      body: AbsorbPointer(
-        absorbing: _busy,
-        child: Stack(
-          children: [
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: _busy ? 0.5 : 1,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Info banner (optional)
-                        banner,
-                        if (_infoBanner != null) const SizedBox(height: 8),
+      body: SafeArea(
+        child: AbsorbPointer(
+          absorbing: _busy,
+          child: Stack(
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _busy ? 0.5 : 1,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Info banner (optional)
+                          banner,
+                          if (_infoBanner != null) const SizedBox(height: 8),
 
-                        Text('Welcome to EFTAR',
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 8),
-                        Text('Join with Google or continue with email.', style: theme.textTheme.bodyMedium),
-                        const SizedBox(height: 20),
+                          Text('Create your account',
+                              style: theme.textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 8),
+                          Text('Join with Google or continue with email.',
+                              style: theme.textTheme.bodyMedium),
+                          const SizedBox(height: 20),
 
                         SizedBox(
                           height: 48,
