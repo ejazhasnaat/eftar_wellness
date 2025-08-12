@@ -6,14 +6,15 @@ class UsageRepo {
 
   Future<int> currentMonthCount(String kind) async {
     final uid = _sb.auth.currentUser!.id;
-    final startOfMonth =
-        DateTime(DateTime.now().year, DateTime.now().month, 1).toIso8601String();
+    final startOfMonth = DateTime(DateTime.now().year, DateTime.now().month, 1)
+        .toIso8601String()
+        .substring(0, 10);
     final rows = await _sb
         .from('usage_counters')
         .select('count')
         .eq('user_id', uid)
         .eq('kind', kind)
-        .gte('period_start', startOfMonth)
+        .eq('period_start', startOfMonth)
         .limit(1);
     if (rows.isEmpty) return 0;
     return (rows.first['count'] as num).toInt();
