@@ -41,6 +41,15 @@ dependencies:
   shared_preferences: ^2.5.3
   intl: ^0.20.2
   form_validator: ^2.1.1
+  image_picker: ^1.1.2
+  file_picker: ^10.2.4
+  path: ^1.9.0
+  cached_network_image: ^3.3.1
+  flutter_tts: ^4.2.3
+  speech_to_text: ^7.2.0
+  url_launcher: ^6.3.0
+  geolocator: ^12.0.0
+  geocoding: ^2.1.1
 
 dev_dependencies:
   flutter_test:
@@ -51,7 +60,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.6.0
 
 # For information on the generic Dart part of this file, see the
