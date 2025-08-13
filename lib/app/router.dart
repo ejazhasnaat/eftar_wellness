@@ -20,7 +20,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/signup', builder: (context, state) => const SignUpScreen()),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
-      // Onboarding for experts
       GoRoute(path: '/onboard/expert', builder: (context, state) => const ExpertDetailsScreen()),
       GoRoute(path: '/expert/approval-status', builder: (context, state) => const ExpertApprovalStatusScreen()),
     ],

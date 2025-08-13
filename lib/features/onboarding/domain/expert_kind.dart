@@ -8,6 +8,6 @@ extension ExpertKindX on ExpertKind {
       case ExpertKind.healthyMealsProvider: return 'Healthy Meals Provider';
     }
   }
-  String get nameKey => name; // for storage
+  String get nameKey => name; // stable key for storage
 }
 
