@@ -1,0 +1,28 @@
+name: eftar_wellness
+description: "EFTAR AI Wellness Assistant"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod:
+  go_router:
+  drift:
+  sqlite3_flutter_libs:
+  path_provider:
+  uuid:
+  shared_preferences:
+  google_fonts: ^6.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner:
+  drift_dev:
+
+flutter:
+  uses-material-design: true
