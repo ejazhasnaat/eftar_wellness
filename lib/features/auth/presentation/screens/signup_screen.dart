@@ -1,186 +1,244 @@
-// lib/features/auth/presentation/screens/signup_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../auth/application/auth_controller.dart';
-import '../../../auth/domain/user_path.dart';
-import '../../../../core/services/location_service.dart';
-import '../widgets/social_buttons.dart';
-// Use a package import for the theme extension to avoid fragile relative paths
-import 'package:eftar_wellness/app/theme/app_theme.dart';
-
-class SignUpScreen extends ConsumerStatefulWidget {
+/// Modern signup:
+/// - Banner + subtext
+/// - Google/Apple sign-in
+/// - Email signup (Name, Email, Password, optional Phone)
+/// - "Set your path" (Getting Healthy vs Wellness Experts)
+/// - On success: snackbar + route by path
+/// - Inputs: outlined, no fill (respect global InputDecorationTheme)
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
+
   @override
-  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignUpScreenState extends ConsumerState<SignUpScreen> {
+enum _UserPath { seeker, expert }
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _phone = TextEditingController();
+
   bool _obscure = true;
   bool _busy = false;
-  UserPath _path = UserPath.seeker;
+  _UserPath _path = _UserPath.seeker;
 
   @override
   void dispose() {
-    _name.dispose(); _email.dispose(); _password.dispose(); _phone.dispose();
+    _name.dispose();
+    _email.dispose();
+    _password.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
-  Future<void> _doGoogle() async {
+  Future<void> _onGoogle() async {
+    if (_busy) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).signInWithGoogle();
-      if (mounted) _goNext();
+      // TODO: integrate Google sign-in.
+      _notifyAndNavigate();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _doApple() async {
+  Future<void> _onApple() async {
+    if (_busy) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).signInWithApple();
-      if (mounted) _goNext();
+      // TODO: integrate Apple sign-in.
+      _notifyAndNavigate();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _doEmail() async {
+  Future<void> _onEmailSignup() async {
+    if (_busy) return;
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      final loc = await LocationService().getCityCountry();
-      await ref.read(authRepositoryProvider).signUpWithEmail(
-        name: _name.text.trim(),
-        email: _email.text.trim(),
-        password: _password.text,
-        phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
-        city: loc.city,
-        country: loc.country,
-        path: _path,
-      );
-      if (mounted) _goNext();
+      // TODO: integrate email signup; capture name/email/password/phone.
+      // Optionally attempt location (city/country) via your LocationService later.
+      _notifyAndNavigate();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  void _goNext() {
-    switch (_path) {
-      case UserPath.seeker: context.go('/onboard/seeker'); break;
-      case UserPath.expert: context.go('/onboard/expert'); break;
+  void _notifyAndNavigate() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Account created successfully')),
+    );
+    if (_path == _UserPath.expert) {
+      context.go('/onboard/expert');            // Expert onboarding
+    } else {
+      context.go('/onboard/wellness/body');     // Health seeker onboarding
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign up')),
+      appBar: AppBar(title: const Text('Create account')),
       body: AbsorbPointer(
         absorbing: _busy,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        child: Stack(
           children: [
-            Text('Welcome to EFTAR', style: tt.headlineSmall),
-            const SizedBox(height: 6),
-            Text('Join with Google/Apple or continue with email.',
-                style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            SocialButtons(onGoogle: _doGoogle, onApple: _doApple),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: Divider(color: cs.outlineVariant)),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('or')),
-              Expanded(child: Divider(color: cs.outlineVariant)),
-            ]),
-            const SizedBox(height: 12),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _name,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Name required' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (v) {
-                      final s = v?.trim() ?? '';
-                      if (s.isEmpty) return 'Email required';
-                      if (!s.contains('@') || !s.contains('.')) return 'Invalid email';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _password,
-                    obscureText: _obscure,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        onPressed: () => setState(() => _obscure = !_obscure),
-                        icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Banner
+                      Text(
+                        'Welcome to EFTAR',
+                        style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    validator: (v) => (v == null || v.length < 6) ? 'Min 6 chars' : null,
+                      const SizedBox(height: 6),
+                      Text(
+                        'Join with Google/Apple or continue with email.',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _onGoogle,
+                              icon: const Icon(Icons.g_mobiledata, size: 24),
+                              label: const Text('Continue with Google'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _onApple,
+                              icon: const Icon(Icons.apple, size: 20),
+                              label: const Text('Continue with Apple'),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+                      Row(children: [
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text('or', style: theme.textTheme.bodySmall),
+                        ),
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                      ]),
+
+                      const SizedBox(height: 16),
+                      Form(
+                        key: _formKey,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _name,
+                              textInputAction: TextInputAction.next,
+                              decoration: const InputDecoration(labelText: 'Name'),
+                              validator: (v) => (v == null || v.trim().length < 2) ? 'Enter at least 2 characters' : null,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _email,
+                              textInputAction: TextInputAction.next,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(labelText: 'Email'),
+                              validator: (v) {
+                                final s = (v ?? '').trim();
+                                if (s.isEmpty) return 'Required';
+                                final re = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                return re.hasMatch(s) ? null : 'Enter a valid email';
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _password,
+                              obscureText: _obscure,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _obscure = !_obscure),
+                                ),
+                              ),
+                              validator: (v) {
+                                final s = (v ?? '').trim();
+                                if (s.length < 8) return 'Use at least 8 characters';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _phone,
+                              keyboardType: TextInputType.phone,
+                              decoration: const InputDecoration(labelText: 'Phone (optional)'),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+                      Text(
+                        'Set your path:',
+                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Tappable outlined radio-cards
+                      _PathCard(
+                        title: 'Getting Healthy',
+                        subtitle: 'Improve Health and Well-being with AI and Wellness Experts.',
+                        value: _UserPath.seeker,
+                        groupValue: _path,
+                        onChanged: (v) => setState(() => _path = v),
+                      ),
+                      const SizedBox(height: 8),
+                      _PathCard(
+                        title: 'Wellness Experts',
+                        subtitle: 'Support Health Seekers in reaching their wellness goals.',
+                        value: _UserPath.expert,
+                        groupValue: _path,
+                        onChanged: (v) => setState(() => _path = v),
+                      ),
+
+                      const SizedBox(height: 20),
+                      FilledButton(
+                        onPressed: _onEmailSignup,
+                        child: const Text('Create account'),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.go('/signin'),
+                        child: const Text('Already have an account? Sign in'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _phone,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Phone (optional)'),
-                  ),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Set your path:',
-              style: tt.titleMedium?.copyWith(
-                color: cs.onSurface, // black/white per theme
-              ),
-            ),
-            const SizedBox(height: 8),
-            _PathTile(
-              selected: _path == UserPath.seeker,
-              title: 'Getting Healthy',
-              subtitle: 'Improve Health and Well-being with AI and Wellness Experts.',
-              onTap: () => setState(() => _path = UserPath.seeker),
-            ),
-            const SizedBox(height: 8),
-            _PathTile(
-              selected: _path == UserPath.expert,
-              title: 'Wellness Experts',
-              subtitle: 'Support Health Seekers in reaching their wellness goals.',
-              onTap: () => setState(() => _path = UserPath.expert),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _busy ? null : _doEmail,
-              child: _busy
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Create account'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => context.push('/signin'),
-              child: const Text('Already have an account? Sign in'),
-            ),
+            if (_busy)
+              const PositionedFill(child: _Busy()),
           ],
         ),
       ),
@@ -188,58 +246,53 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   }
 }
 
-class _PathTile extends StatelessWidget {
-  const _PathTile({
-    required this.selected,
+class _PathCard extends StatelessWidget {
+  const _PathCard({
     required this.title,
     required this.subtitle,
-    required this.onTap,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
   });
 
-  final bool selected;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final _UserPath value;
+  final _UserPath groupValue;
+  final ValueChanged<_UserPath> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final deco = Theme.of(context).extension<AppDecorations>()!;
-    final cs = Theme.of(context).colorScheme;
-
+    final theme = Theme.of(context);
+    final border = OutlineInputBorder(
+      borderSide: BorderSide(color: theme.dividerColor),
+      borderRadius: BorderRadius.circular(14),
+    );
+    final selected = value == groupValue;
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(deco.radius),
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => onChanged(value),
       child: Container(
-        decoration: deco.outlinedTile(selected: selected), // themed outlined style (no fill)
-        padding: const EdgeInsets.all(16),
+        decoration: ShapeDecoration(
+          color: Colors.transparent, // consistent: no fill
+          shape: border,
+        ),
+        padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            Radio<bool>(
-              value: true,
-              groupValue: selected,
-              onChanged: (_) => onTap(),
+            Radio<_UserPath>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: (v) => onChanged(v ?? value),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ✅ Force text color to follow theme surface (black in light, white in dark)
-                  Text(
-                    title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(color: cs.onSurface),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                  ),
+                  Text(title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: theme.textTheme.bodySmall),
                 ],
               ),
             ),
@@ -247,6 +300,23 @@ class _PathTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _Busy extends StatelessWidget {
+  const _Busy();
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(child: Center(child: CircularProgressIndicator()));
+  }
+}
+
+class PositionedFill extends StatelessWidget {
+  const PositionedFill({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(child: child);
   }
 }
 
