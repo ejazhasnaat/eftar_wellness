@@ -72,10 +72,15 @@ class _GoalsStepScreenState extends ConsumerState<GoalsStepScreen> {
                 ),
                 if (isOther) ...[
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _otherGoalCtrl,
-                    decoration: const InputDecoration(labelText: 'Describe your goal'),
-                    onChanged: (v) => n.setGoalOther(v.trim().isEmpty ? null : v.trim()),
+                  Material(
+                    elevation: 2,
+                    shadowColor: AppTheme.kSoftShadow,
+                    borderRadius: BorderRadius.circular(14),
+                    child: TextFormField(
+                      controller: _otherGoalCtrl,
+                      decoration: const InputDecoration(labelText: 'Describe your goal'),
+                      onChanged: (v) => n.setGoalOther(v.trim().isEmpty ? null : v.trim()),
+                    ),
                   ),
                 ],
               ],
@@ -96,34 +101,49 @@ class _GoalsStepScreenState extends ConsumerState<GoalsStepScreen> {
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(
-                    child: TextFormField(
-                      initialValue: s.activity.minutesPerWeek.toString(),
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Cardio minutes/week'),
-                      onChanged: (v) =>
-                          n.setActivity(s.activity.copyWith(minutesPerWeek: int.tryParse(v.trim()) ?? 0)),
+                    child: Material(
+                      elevation: 2,
+                      shadowColor: AppTheme.kSoftShadow,
+                      borderRadius: BorderRadius.circular(14),
+                      child: TextFormField(
+                        initialValue: s.activity.minutesPerWeek.toString(),
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Cardio minutes/week'),
+                        onChanged: (v) =>
+                            n.setActivity(s.activity.copyWith(minutesPerWeek: int.tryParse(v.trim()) ?? 0)),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextFormField(
-                      initialValue: s.activity.strengthDays.toString(),
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Strength days/week'),
-                      onChanged: (v) =>
-                          n.setActivity(s.activity.copyWith(strengthDays: int.tryParse(v.trim()) ?? 0)),
+                    child: Material(
+                      elevation: 2,
+                      shadowColor: AppTheme.kSoftShadow,
+                      borderRadius: BorderRadius.circular(14),
+                      child: TextFormField(
+                        initialValue: s.activity.strengthDays.toString(),
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'Strength days/week'),
+                        onChanged: (v) =>
+                            n.setActivity(s.activity.copyWith(strengthDays: int.tryParse(v.trim()) ?? 0)),
+                      ),
                     ),
                   ),
                 ]),
                 const SizedBox(height: 12),
-                TextFormField(
-                  initialValue: s.habits.hydrationCups.toString(),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Hydration (glasses/day)'),
-                  onChanged: (v) {
-                    final nCups = int.tryParse(v.trim()) ?? s.habits.hydrationCups;
-                    n.setHabits(s.habits.copyWith(hydrationCups: nCups));
-                  },
+                Material(
+                  elevation: 2,
+                  shadowColor: AppTheme.kSoftShadow,
+                  borderRadius: BorderRadius.circular(14),
+                  child: TextFormField(
+                    initialValue: s.habits.hydrationCups.toString(),
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Hydration (glasses/day)'),
+                    onChanged: (v) {
+                      final nCups = int.tryParse(v.trim()) ?? s.habits.hydrationCups;
+                      n.setHabits(s.habits.copyWith(hydrationCups: nCups));
+                    },
+                  ),
                 ),
               ],
             ),

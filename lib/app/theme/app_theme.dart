@@ -1,144 +1,172 @@
 import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'brand.dart';
 
 class AppTheme {
-  static ThemeData get light => _build(Brightness.light);
-  static ThemeData get dark  => _build(Brightness.dark);
+  // Design tokens
+  static const kOutlineRadius = 14.0;
+  static const kFillGrey = Color(0xFFF7F7F7);
+  static const kSoftShadow = Color(0x1A000000); // ~6% black
 
-  static ThemeData _build(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: kBrandSeed,
-      brightness: brightness,
-    );
+  static ThemeData get light => _light();
+  static ThemeData get dark => ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF00A980),
+        brightness: Brightness.dark,
+      );
 
+  static ThemeData _light() {
     final base = ThemeData(
       useMaterial3: true,
-      brightness: brightness,
-      colorScheme: scheme,
-      visualDensity: VisualDensity.adaptivePlatformDensity,
+      colorSchemeSeed: const Color(0xFF00A980), // tweak to your brand
+      brightness: Brightness.light,
     );
 
-    final textTheme = GoogleFonts.interTextTheme(base.textTheme).copyWith(
-      headlineLarge: GoogleFonts.inter(fontWeight: FontWeight.w700, letterSpacing: -0.5),
-      titleMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
-      labelLarge:  GoogleFonts.inter(fontWeight: FontWeight.w600),
+    final cs = base.colorScheme;
+
+    // Shared rounded shape
+    final rounded14 = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(kOutlineRadius),
     );
 
-    final isLight = brightness == Brightness.light;
+    // Reusable outline border for inputs
+    OutlineInputBorder _border(Color color, double width) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(kOutlineRadius),
+          borderSide: BorderSide(color: color, width: width),
+        );
 
     return base.copyWith(
-      // Pure white in light mode
-      scaffoldBackgroundColor: isLight ? Colors.white : scheme.surface,
-      // Align surfaces with white in light mode
-      colorScheme: isLight ? scheme.copyWith(surface: Colors.white) : scheme,
+      // Remove Material3 tint on surfaces so our grey fill looks exact.
+      applyElevationOverlayColor: false,
+      splashFactory: InkSparkle.splashFactory,
 
-      textTheme: textTheme,
-
-      appBarTheme: AppBarTheme(
-        backgroundColor: isLight ? Colors.white : scheme.surface,
-        foregroundColor: scheme.onSurface,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
-      ),
-
-      // Cards (keep flat look)
-      cardTheme: CardThemeData(
-        color: isLight ? Colors.white : scheme.surface,
-        elevation: 0,
-        margin: const EdgeInsets.all(12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-      ),
-
-      // Buttons
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: textTheme.labelLarge,
-          elevation: 0,
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          side: BorderSide(color: scheme.outline),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-
-      // Text fields (no fill, grey outline; text auto black/white per theme)
+      // --- TEXT FIELDS ---
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: _outline(scheme.outline),
-        enabledBorder: _outline(scheme.outline),
-        disabledBorder: _outline(scheme.outline.withOpacity(0.5)),
-        focusedBorder: _outline(scheme.primary, 2),
-        errorBorder: _outline(scheme.error),
-        focusedErrorBorder: _outline(scheme.error, 2),
+        isDense: true,
+        filled: true,
+        fillColor: kFillGrey, // ✅ light grey background (app-wide)
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: _border(base.colorScheme.outlineVariant, 1.1),
+        enabledBorder: _border(base.colorScheme.outlineVariant, 1.1),
+        focusedBorder: _border(cs.primary, 1.8),
+        errorBorder: _border(cs.error, 1.4),
+        focusedErrorBorder: _border(cs.error, 1.4),
+        labelStyle: base.textTheme.bodyMedium,
+        hintStyle: base.textTheme.bodyMedium?.copyWith(
+          color: base.textTheme.bodyMedium?.color?.withOpacity(0.6),
+        ),
       ),
 
-      // Selection controls
-      checkboxTheme: CheckboxThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        side: BorderSide(color: scheme.outline),
-        fillColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? scheme.primary : null),
-        checkColor: MaterialStateProperty.all(scheme.onPrimary),
+      // --- ELEVATED BUTTONS (Primary) ---
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(rounded14),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+          elevation: const WidgetStatePropertyAll(2), // subtle lift
+          shadowColor: const WidgetStatePropertyAll(kSoftShadow),
+          backgroundColor: WidgetStatePropertyAll(cs.primary),
+          foregroundColor: WidgetStatePropertyAll(cs.onPrimary),
+          overlayColor: WidgetStatePropertyAll(cs.onPrimary.withOpacity(0.08)),
+        ),
       ),
-      switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? scheme.onPrimary : scheme.outline),
-        trackColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? scheme.primary : scheme.outlineVariant),
+
+      // --- OUTLINED BUTTONS (Neutral, matches outline field) ---
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(rounded14),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+          // We mimic the outline field look by giving the button a grey fill + border.
+          backgroundColor: const WidgetStatePropertyAll(kFillGrey),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: base.colorScheme.outlineVariant, width: 1.1),
+          ),
+          elevation: const WidgetStatePropertyAll(2), // subtle lift to echo shadow
+          shadowColor: const WidgetStatePropertyAll(kSoftShadow),
+          foregroundColor: WidgetStatePropertyAll(base.colorScheme.onSurface),
+          overlayColor: WidgetStatePropertyAll(cs.primary.withOpacity(0.08)),
+        ),
       ),
+
+      // --- SEGMENTED BUTTONS ---
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(rounded14),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            return selected ? cs.primary.withOpacity(0.10) : kFillGrey;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            final selected = states.contains(WidgetState.selected);
+            return BorderSide(
+              color: selected ? cs.primary : base.colorScheme.outlineVariant,
+              width: selected ? 1.6 : 1.1,
+            );
+          }),
+          elevation: const WidgetStatePropertyAll(2),
+          shadowColor: const WidgetStatePropertyAll(kSoftShadow),
+          foregroundColor: WidgetStatePropertyAll(base.colorScheme.onSurface),
+        ),
+      ),
+
+      // --- RADIO (colors only; tile container styling is layout-level) ---
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith(
-          (s) => s.contains(MaterialState.selected) ? scheme.primary : scheme.outline),
-        overlayColor: MaterialStateProperty.all(Colors.transparent), // no highlight glow
-        visualDensity: VisualDensity.standard,
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected) ? cs.primary : base.colorScheme.outline;
+        }),
+        visualDensity: VisualDensity.compact,
       ),
 
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: isLight ? Colors.white : scheme.surface,
-        elevation: 0,
-        indicatorColor: scheme.primaryContainer,
-        labelTextStyle: MaterialStateProperty.all(
-          textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
+      // --- PROGRESS INDICATORS ---
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: cs.primary,
+        linearTrackColor: base.colorScheme.surfaceContainerHighest,
+        // Note: rounded corners require a ClipRRect in usage; not themeable.
       ),
 
-      progressIndicatorTheme: ProgressIndicatorThemeData(color: scheme.primary),
-      sliderTheme: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-      dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1, space: 1),
+      // --- CARDS (match outline surface) ---
+      cardTheme: CardThemeData(
+        color: kFillGrey, // ✅ same light grey
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: base.colorScheme.outlineVariant, width: 1.1),
+        ),
+        elevation: 2,
+        shadowColor: kSoftShadow,
+        margin: const EdgeInsets.all(0),
+        surfaceTintColor: Colors.transparent, // keep the grey exact
+      ),
 
-      // Theme extension for consistent outlined boxes (no fill)
+      // --- CHIPS (optional: to match outline look) ---
+      chipTheme: base.chipTheme.copyWith(
+        side: BorderSide(color: base.colorScheme.outlineVariant, width: 1.1),
+        shape: StadiumBorder(side: BorderSide(color: base.colorScheme.outlineVariant, width: 1.1)),
+        backgroundColor: kFillGrey,
+        selectedColor: cs.primary.withOpacity(0.10),
+        disabledColor: kFillGrey,
+        elevation: 2,
+        shadowColor: kSoftShadow,
+      ),
+
+      // Reduce default Material surface tinting so our colors feel consistent.
+      dividerColor: base.colorScheme.outlineVariant,
+      scaffoldBackgroundColor: base.colorScheme.surface,
+      canvasColor: base.colorScheme.surface,
+
       extensions: <ThemeExtension<dynamic>>[
         AppDecorations(
-          radius: 16,
-          outline: scheme.outline,
-          selectedOutline: scheme.primary,
+          radius: kOutlineRadius,
+          outline: base.colorScheme.outlineVariant,
+          selectedOutline: cs.primary,
         ),
       ],
     );
   }
-
-  static OutlineInputBorder _outline(Color c, [double w = 1]) =>
-      OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: c, width: w),
-      );
 }
 
 /// Extension to theme consistent outlined containers/tiles across the app.
@@ -159,7 +187,7 @@ class AppDecorations extends ThemeExtension<AppDecorations> {
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: selected ? selectedOutline : outline,
-        width: selected ? 2 : 1,
+        width: selected ? 1.6 : 1.1,
       ),
       color: Colors.transparent,
     );
@@ -188,4 +216,3 @@ class AppDecorations extends ThemeExtension<AppDecorations> {
     );
   }
 }
-

@@ -3,6 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../auth/application/auth_controller.dart';
 import '../widgets/social_buttons.dart';
+import '../../../../app/theme/app_theme.dart';
+
+import '../../../../app/router.dart' show AppRoutes;
+import 'package:flutter/foundation.dart' show kDebugMode;
+import '../../../../../app/app.dart' show AppRoutes; // if AppRoutes is in app.dart
+
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -88,29 +94,39 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  TextFormField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (v) {
-                      final s = v?.trim() ?? '';
-                      if (s.isEmpty) return 'Email required';
-                      if (!s.contains('@') || !s.contains('.')) return 'Invalid email';
-                      return null;
-                    },
+                  Material(
+                    elevation: 2,
+                    shadowColor: AppTheme.kSoftShadow,
+                    borderRadius: BorderRadius.circular(14),
+                    child: TextFormField(
+                      controller: _email,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (v) {
+                        final s = v?.trim() ?? '';
+                        if (s.isEmpty) return 'Email required';
+                        if (!s.contains('@') || !s.contains('.')) return 'Invalid email';
+                        return null;
+                      },
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _password,
-                    obscureText: _obscure,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        onPressed: () => setState(() => _obscure = !_obscure),
-                        icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                  Material(
+                    elevation: 2,
+                    shadowColor: AppTheme.kSoftShadow,
+                    borderRadius: BorderRadius.circular(14),
+                    child: TextFormField(
+                      controller: _password,
+                      obscureText: _obscure,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                        ),
                       ),
+                      validator: (v) => (v == null || v.length < 6) ? 'Min 6 chars' : null,
                     ),
-                    validator: (v) => (v == null || v.length < 6) ? 'Min 6 chars' : null,
                   ),
                   const SizedBox(height: 16),
                   FilledButton(

@@ -293,49 +293,64 @@ class _BodyStepScreenState extends ConsumerState<BodyStepScreen> {
           if (_mode == _BodyInputMode.heightWeight) ...[
             Row(children: [
               Expanded(
-                child: TextFormField(
-                  controller: _heightCtrl,
-                  keyboardType: state.units == Units.metric ? TextInputType.number : TextInputType.text,
-                  decoration: InputDecoration(
-                    labelText: state.units == Units.metric ? 'Height (cm)' : 'Height (ft′ in″)  e.g., 5′11″',
+                child: Material(
+                  elevation: 2,
+                  shadowColor: AppTheme.kSoftShadow,
+                  borderRadius: BorderRadius.circular(14),
+                  child: TextFormField(
+                    controller: _heightCtrl,
+                    keyboardType: state.units == Units.metric ? TextInputType.number : TextInputType.text,
+                    decoration: InputDecoration(
+                      labelText: state.units == Units.metric ? 'Height (cm)' : 'Height (ft′ in″)  e.g., 5′11″',
+                    ),
+                    onChanged: (v) {
+                      double? cm;
+                      if (state.units == Units.metric) {
+                        cm = _toDouble(v);
+                      } else {
+                        cm = _parseImperialHeightToCm(v);
+                      }
+                      ref.read(wellnessProfileProvider.notifier).setHeightCm(cm);
+                    },
                   ),
-                  onChanged: (v) {
-                    double? cm;
-                    if (state.units == Units.metric) {
-                      cm = _toDouble(v);
-                    } else {
-                      cm = _parseImperialHeightToCm(v);
-                    }
-                    ref.read(wellnessProfileProvider.notifier).setHeightCm(cm);
-                  },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: TextFormField(
-                  controller: _weightCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: state.units == Units.metric ? 'Weight (kg)' : 'Weight (lb)',
+                child: Material(
+                  elevation: 2,
+                  shadowColor: AppTheme.kSoftShadow,
+                  borderRadius: BorderRadius.circular(14),
+                  child: TextFormField(
+                    controller: _weightCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: state.units == Units.metric ? 'Weight (kg)' : 'Weight (lb)',
+                    ),
+                    onChanged: (v) {
+                      final kg = state.units == Units.metric
+                          ? _toDouble(v)
+                          : (_toDouble(v) == null ? null : _toDouble(v)! * 0.45359237);
+                      ref.read(wellnessProfileProvider.notifier).setWeightKg(kg);
+                    },
                   ),
-                  onChanged: (v) {
-                    final kg = state.units == Units.metric
-                        ? _toDouble(v)
-                        : (_toDouble(v) == null ? null : _toDouble(v)! * 0.45359237);
-                    ref.read(wellnessProfileProvider.notifier).setWeightKg(kg);
-                  },
                 ),
               ),
             ]),
           ] else ...[
-            TextFormField(
-              controller: _bmiCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'BMI'),
-              onChanged: (v) {
-                final val = _toDouble(v);
-                ref.read(wellnessProfileProvider.notifier).setBmi(val);
-              },
+            Material(
+              elevation: 2,
+              shadowColor: AppTheme.kSoftShadow,
+              borderRadius: BorderRadius.circular(14),
+              child: TextFormField(
+                controller: _bmiCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'BMI'),
+                onChanged: (v) {
+                  final val = _toDouble(v);
+                  ref.read(wellnessProfileProvider.notifier).setBmi(val);
+                },
+              ),
             ),
           ],
 

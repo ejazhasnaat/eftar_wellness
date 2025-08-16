@@ -300,22 +300,37 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                         const SizedBox(height: 16),
 
                         // Common (portfolio/link/bio)
-                        TextFormField(
-                          controller: _portfolio,
-                          decoration: const InputDecoration(labelText: 'Portfolio / Website URL'),
-                          validator: _validateUrl,
+                        Material(
+                          elevation: 2,
+                          shadowColor: AppTheme.kSoftShadow,
+                          borderRadius: BorderRadius.circular(14),
+                          child: TextFormField(
+                            controller: _portfolio,
+                            decoration: const InputDecoration(labelText: 'Portfolio / Website URL'),
+                            validator: _validateUrl,
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _linkedIn,
-                          decoration: const InputDecoration(labelText: 'LinkedIn / Professional Profile'),
-                          validator: _validateUrl,
+                        Material(
+                          elevation: 2,
+                          shadowColor: AppTheme.kSoftShadow,
+                          borderRadius: BorderRadius.circular(14),
+                          child: TextFormField(
+                            controller: _linkedIn,
+                            decoration: const InputDecoration(labelText: 'LinkedIn / Professional Profile'),
+                            validator: _validateUrl,
+                          ),
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _bio,
-                          maxLines: 2,
-                          decoration: const InputDecoration(labelText: 'Short bio (optional, ≤ 240 chars)'),
+                        Material(
+                          elevation: 2,
+                          shadowColor: AppTheme.kSoftShadow,
+                          borderRadius: BorderRadius.circular(14),
+                          child: TextFormField(
+                            controller: _bio,
+                            maxLines: 2,
+                            decoration: const InputDecoration(labelText: 'Short bio (optional, ≤ 240 chars)'),
+                          ),
                         ),
                         const SizedBox(height: 16),
 
@@ -325,18 +340,28 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _license,
-                                  decoration: const InputDecoration(labelText: 'License / Registration # *'),
-                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _license,
+                                    decoration: const InputDecoration(labelText: 'License / Registration # *'),
+                                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _issuingAuthority,
-                                  decoration: const InputDecoration(labelText: 'Issuing Authority *'),
-                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _issuingAuthority,
+                                    decoration: const InputDecoration(labelText: 'Issuing Authority *'),
+                                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                  ),
                                 ),
                               ),
                             ],
@@ -345,51 +370,81 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _licenseExpiry,
-                                  decoration: const InputDecoration(labelText: 'License Expiry (YYYY-MM-DD)'),
-                                  validator: _validateDate,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _licenseExpiry,
+                                    decoration: const InputDecoration(labelText: 'License Expiry (YYYY-MM-DD)'),
+                                    validator: _validateDate,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _years,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(labelText: 'Years of Experience'),
-                                  validator: _validateYears,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _years,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(labelText: 'Years of Experience'),
+                                    validator: _validateYears,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _specialty,
-                            decoration: const InputDecoration(labelText: 'Primary Specialty'),
-                            validator: (v) => (v != null && v.trim().length >= 2) ? null : 'Min 2 chars',
+                          Material(
+                            elevation: 2,
+                            shadowColor: AppTheme.kSoftShadow,
+                            borderRadius: BorderRadius.circular(14),
+                            child: TextFormField(
+                              controller: _specialty,
+                              decoration: const InputDecoration(labelText: 'Primary Specialty'),
+                              validator: (v) => (v != null && v.trim().length >= 2) ? null : 'Min 2 chars',
+                            ),
                           ),
                           const SizedBox(height: 16),
                         ] else if (_kind == ExpertKind.fitnessExpert) ...[
                           _SectionHeader('Fitness Credentials (softer criteria)'),
-                          TextFormField(
-                            controller: _certName,
-                            decoration: const InputDecoration(labelText: 'Certification (ACE/NASM/ISSA/etc.)'),
+                          Material(
+                            elevation: 2,
+                            shadowColor: AppTheme.kSoftShadow,
+                            borderRadius: BorderRadius.circular(14),
+                            child: TextFormField(
+                              controller: _certName,
+                              decoration: const InputDecoration(labelText: 'Certification (ACE/NASM/ISSA/etc.)'),
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _certId,
-                                  decoration: const InputDecoration(labelText: 'Certification ID'),
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _certId,
+                                    decoration: const InputDecoration(labelText: 'Certification ID'),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _certExpiry,
-                                  decoration: const InputDecoration(labelText: 'Cert Expiry (YYYY-MM-DD)'),
-                                  validator: _validateDate,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _certExpiry,
+                                    decoration: const InputDecoration(labelText: 'Cert Expiry (YYYY-MM-DD)'),
+                                    validator: _validateDate,
+                                  ),
                                 ),
                               ),
                             ],
@@ -398,18 +453,28 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _socialHandle,
-                                  decoration: const InputDecoration(labelText: 'Social handle / URL (optional)'),
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _socialHandle,
+                                    decoration: const InputDecoration(labelText: 'Social handle / URL (optional)'),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _followers,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(labelText: 'Followers (optional)'),
-                                  validator: _validateFollowers,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _followers,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(labelText: 'Followers (optional)'),
+                                    validator: _validateFollowers,
+                                  ),
                                 ),
                               ),
                             ],
@@ -418,19 +483,29 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _years,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(labelText: 'Years of Experience'),
-                                  validator: _validateYears,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _years,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(labelText: 'Years of Experience'),
+                                    validator: _validateYears,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _specialty,
-                                  decoration: const InputDecoration(labelText: 'Primary Specialty'),
-                                  validator: (v) => (v != null && v.trim().length >= 2) ? null : 'Min 2 chars',
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _specialty,
+                                    decoration: const InputDecoration(labelText: 'Primary Specialty'),
+                                    validator: (v) => (v != null && v.trim().length >= 2) ? null : 'Min 2 chars',
+                                  ),
                                 ),
                               ),
                             ],
@@ -438,27 +513,42 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           const SizedBox(height: 16),
                         ] else if (_kind == ExpertKind.healthyMealsProvider) ...[
                           _SectionHeader('Healthy Meals Provider'),
-                          TextFormField(
-                            controller: _businessName,
-                            decoration: const InputDecoration(labelText: 'Business / Kitchen Name *'),
-                            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          Material(
+                            elevation: 2,
+                            shadowColor: AppTheme.kSoftShadow,
+                            borderRadius: BorderRadius.circular(14),
+                            child: TextFormField(
+                              controller: _businessName,
+                              decoration: const InputDecoration(labelText: 'Business / Kitchen Name *'),
+                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _license,
-                                  decoration: const InputDecoration(labelText: 'Food Safety License / Permit # *'),
-                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _license,
+                                    decoration: const InputDecoration(labelText: 'Food Safety License / Permit # *'),
+                                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _issuingAuthority,
-                                  decoration: const InputDecoration(labelText: 'Issuing Authority *'),
-                                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _issuingAuthority,
+                                    decoration: const InputDecoration(labelText: 'Issuing Authority *'),
+                                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                  ),
                                 ),
                               ),
                             ],
@@ -467,17 +557,27 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: TextFormField(
-                                  controller: _licenseExpiry,
-                                  decoration: const InputDecoration(labelText: 'License Expiry (YYYY-MM-DD)'),
-                                  validator: _validateDate,
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _licenseExpiry,
+                                    decoration: const InputDecoration(labelText: 'License Expiry (YYYY-MM-DD)'),
+                                    validator: _validateDate,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: TextFormField(
-                                  controller: _address,
-                                  decoration: const InputDecoration(labelText: 'Kitchen/Production Address (optional)'),
+                                child: Material(
+                                  elevation: 2,
+                                  shadowColor: AppTheme.kSoftShadow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: TextFormField(
+                                    controller: _address,
+                                    decoration: const InputDecoration(labelText: 'Kitchen/Production Address (optional)'),
+                                  ),
                                 ),
                               ),
                             ],
@@ -505,17 +605,22 @@ class _ExpertDetailsScreenState extends ConsumerState<ExpertDetailsScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _deliveryRadiusKm,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Delivery Radius (km, optional)'),
-                            validator: (v) {
-                              final s = (v ?? '').trim();
-                              if (s.isEmpty) return null;
-                              final n = int.tryParse(s);
-                              if (n == null || n < 0 || n > 50) return 'Enter 0–50';
-                              return null;
-                            },
+                          Material(
+                            elevation: 2,
+                            shadowColor: AppTheme.kSoftShadow,
+                            borderRadius: BorderRadius.circular(14),
+                            child: TextFormField(
+                              controller: _deliveryRadiusKm,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(labelText: 'Delivery Radius (km, optional)'),
+                              validator: (v) {
+                                final s = (v ?? '').trim();
+                                if (s.isEmpty) return null;
+                                final n = int.tryParse(s);
+                                if (n == null || n < 0 || n > 50) return 'Enter 0–50';
+                                return null;
+                              },
+                            ),
                           ),
                           const SizedBox(height: 16),
                         ],

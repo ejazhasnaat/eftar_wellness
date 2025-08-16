@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme/app_theme.dart';
 
 /// Modern signup:
 /// - Banner + subtext
@@ -152,47 +153,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         child: Column(
                           children: [
-                            TextFormField(
-                              controller: _name,
-                              textInputAction: TextInputAction.next,
-                              decoration: const InputDecoration(labelText: 'Name'),
-                              validator: (v) => (v == null || v.trim().length < 2) ? 'Enter at least 2 characters' : null,
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _email,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(labelText: 'Email'),
-                              validator: (v) {
-                                final s = (v ?? '').trim();
-                                if (s.isEmpty) return 'Required';
-                                final re = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                                return re.hasMatch(s) ? null : 'Enter a valid email';
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _password,
-                              obscureText: _obscure,
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                suffixIcon: IconButton(
-                                  icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                                  onPressed: () => setState(() => _obscure = !_obscure),
-                                ),
+                            Material(
+                              elevation: 2,
+                              shadowColor: AppTheme.kSoftShadow,
+                              borderRadius: BorderRadius.circular(14),
+                              child: TextFormField(
+                                controller: _name,
+                                textInputAction: TextInputAction.next,
+                                decoration: const InputDecoration(labelText: 'Name'),
+                                validator: (v) => (v == null || v.trim().length < 2) ? 'Enter at least 2 characters' : null,
                               ),
-                              validator: (v) {
-                                final s = (v ?? '').trim();
-                                if (s.length < 8) return 'Use at least 8 characters';
-                                return null;
-                              },
                             ),
                             const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _phone,
-                              keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(labelText: 'Phone (optional)'),
+                            Material(
+                              elevation: 2,
+                              shadowColor: AppTheme.kSoftShadow,
+                              borderRadius: BorderRadius.circular(14),
+                              child: TextFormField(
+                                controller: _email,
+                                textInputAction: TextInputAction.next,
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: const InputDecoration(labelText: 'Email'),
+                                validator: (v) {
+                                  final s = (v ?? '').trim();
+                                  if (s.isEmpty) return 'Required';
+                                  final re = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                  return re.hasMatch(s) ? null : 'Enter a valid email';
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Material(
+                              elevation: 2,
+                              shadowColor: AppTheme.kSoftShadow,
+                              borderRadius: BorderRadius.circular(14),
+                              child: TextFormField(
+                                controller: _password,
+                                obscureText: _obscure,
+                                decoration: InputDecoration(
+                                  labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _obscure = !_obscure),
+                                  ),
+                                ),
+                                validator: (v) {
+                                  final s = (v ?? '').trim();
+                                  if (s.length < 8) return 'Use at least 8 characters';
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Material(
+                              elevation: 2,
+                              shadowColor: AppTheme.kSoftShadow,
+                              borderRadius: BorderRadius.circular(14),
+                              child: TextFormField(
+                                controller: _phone,
+                                keyboardType: TextInputType.phone,
+                                decoration: const InputDecoration(labelText: 'Phone (optional)'),
+                              ),
                             ),
                           ],
                         ),
