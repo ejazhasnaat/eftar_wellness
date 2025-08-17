@@ -12,6 +12,7 @@ import '../features/onboarding/presentation/expert_details_screen.dart';
 import '../features/onboarding/presentation/approval_status_screen.dart';
 import '../features/wellness_profile/presentation/body_step_screen.dart';
 import '../features/wellness_profile/presentation/goals_step_screen.dart';
+import '../features/ai_assistant/presentation/screens/ai_chat_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -39,6 +40,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/onboard/wellness/goals',
           builder: (context, state) => const GoalsStepScreen()),
+      GoRoute(
+          path: '/assistant',
+          builder: (context, state) => const AiChatScreen()),
     ],
   );
 });

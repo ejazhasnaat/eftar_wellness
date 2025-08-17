@@ -7,7 +7,6 @@ import '../../../../app/theme/app_theme.dart';
 import '../widgets/assistant_row.dart';
 import '../widgets/trackers_grid.dart';
 import '../widgets/recommendation_scroller.dart';
-import '../widgets/ai_assistant_panel.dart';
 import '../widgets/glass_panel.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -49,8 +48,8 @@ class HomeScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: '_ai_fab',
-        tooltip: 'AI Assistant',
-        onPressed: () => showAiAssistantPanel(context),
+        tooltip: 'AI Wellness Assistant',
+        onPressed: () => context.push('/assistant'),
         child: const Text(
           'AI',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
