@@ -12,6 +12,8 @@ class AppTheme {
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF00A980),
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        canvasColor: Colors.black,
       );
 
   static ThemeData _light() {
@@ -155,8 +157,8 @@ class AppTheme {
 
       // Reduce default Material surface tinting so our colors feel consistent.
       dividerColor: base.colorScheme.outlineVariant,
-      scaffoldBackgroundColor: base.colorScheme.surface,
-      canvasColor: base.colorScheme.surface,
+      scaffoldBackgroundColor: Colors.white,
+      canvasColor: Colors.white,
 
       extensions: <ThemeExtension<dynamic>>[
         AppDecorations(

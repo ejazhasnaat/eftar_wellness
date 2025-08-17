@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme/theme_controller.dart';
 import '../../../profile/presentation/health_info_settings_tile.dart';
 
 /// App Settings (Profile → Settings).
 /// Canonical settings screen (use this one in routes).
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final mode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -29,11 +32,12 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 12),
 
           const _SectionLabel('Preferences'),
-          _Tile(
-            leading: const Icon(Icons.palette_outlined),
-            title: 'Appearance',
-            subtitle: 'Light / Dark / System',
-            onTap: () => context.push('/settings/appearance'),
+          SwitchListTile(
+            title: const Text('Dark mode'),
+            value: mode == ThemeMode.dark,
+            onChanged: (v) => ref
+                .read(themeModeProvider.notifier)
+                .set(v ? ThemeMode.dark : ThemeMode.light),
           ),
           _Tile(
             leading: const Icon(Icons.notifications_outlined),

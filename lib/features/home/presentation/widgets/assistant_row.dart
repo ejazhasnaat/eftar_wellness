@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/feature_flags.dart';
 import 'glass_panel.dart';
 
-/// Row of assistant related shortcuts: Experts, AI Assistant and Scan Meal.
+/// Row of assistant related shortcuts: Experts and Scan Meal.
 class AssistantRow extends StatelessWidget {
   const AssistantRow({super.key});
 
@@ -52,50 +51,6 @@ class AssistantRow extends StatelessWidget {
                               .textTheme
                               .labelLarge
                               ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // AI Assistant card
-          Expanded(
-            child: Tooltip(
-              message: 'AI Assistant',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(r),
-                onTap: () => showGlassPanel(
-                  context,
-                  title: 'AI Assistant',
-                  actions: [
-                    const GlassPanelAction(Icons.chat_bubble_outline, 'Chat now'),
-                    const GlassPanelAction(Icons.checklist_rtl, 'Plan my day'),
-                    const GlassPanelAction(Icons.tips_and_updates_outlined, 'Personalized tips'),
-                    if (FeatureFlags.aiAssistantVoice)
-                      const GlassPanelAction(Icons.record_voice_over, 'Voice assistant'),
-                  ],
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF00A980),
-                    borderRadius: BorderRadius.circular(r),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.psychology_alt_outlined, color: Colors.white),
-                      SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          'AI Assistant',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
                         ),
                       ),
                     ],

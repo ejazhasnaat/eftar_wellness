@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/feature_flags.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../widgets/assistant_row.dart';
 import '../widgets/trackers_grid.dart';
 import '../widgets/recommendation_scroller.dart';
+import '../widgets/ai_assistant_panel.dart';
 import '../widgets/glass_panel.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -18,7 +20,6 @@ class HomeScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           SliverPadding(
@@ -27,7 +28,7 @@ class HomeScreen extends ConsumerWidget {
               children: const [
                 _CompactHeader(height: 60.0, r: _r),
                 SizedBox(height: 8),
-                _SearchRow(height: 68.0, r: _r),
+                _SearchRow(height: 48.0, r: _r),
                 SizedBox(height: 10),
                 _TodayPlanCard(height: 92.0, r: _r),
                 SizedBox(height: 10),
@@ -46,6 +47,16 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: '_ai_fab',
+        tooltip: 'AI Assistant',
+        onPressed: () => showAiAssistantPanel(context),
+        child: const Text(
+          'AI',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _BottomNav(cs: cs),
     );
   }
@@ -94,6 +105,12 @@ class _CompactHeader extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
+            icon: const Icon(Icons.settings_outlined),
           ),
           const SizedBox(width: 4),
           InkWell(
