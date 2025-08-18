@@ -28,6 +28,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   Widget build(BuildContext context) {
     final messages = ref.watch(aiChatControllerProvider);
     final controller = ref.read(aiChatControllerProvider.notifier);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -50,47 +51,56 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final m = messages[index];
-                return Align(
-                  alignment:
-                      m.isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: m.isUser
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(m.content),
+            child: messages.isEmpty
+                ? _EmptyAssistantHint(color: cs.onSurfaceVariant)
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final m = messages[index];
+                      return Align(
+                        alignment: m.isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          decoration: BoxDecoration(
+                            color: m.isUser
+                                ? cs.primaryContainer
+                                : cs.surfaceVariant,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(m.content),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
           _InputBar(
             controller: _textController,
             onSend: (text) async {
-              if (text.trim().isEmpty) return;
-              await controller.sendText(text);
+              final trimmed = text.trim();
+              if (trimmed.isEmpty) return;
+              await controller.sendText(trimmed);
               _textController.clear();
-              _scrollController.animateTo(
-                _scrollController.position.maxScrollExtent + 60,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
+              // Ensure we auto-scroll to the latest message
+              await Future.delayed(const Duration(milliseconds: 50));
+              if (_scrollController.hasClients) {
+                _scrollController.animateTo(
+                  _scrollController.position.maxScrollExtent + 60,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOut,
+                );
+              }
             },
           ),
         ],
       ),
-      bottomNavigationBar: _AssistantBottomBar(onScanMeal: controller.analyzeMeal),
+      bottomNavigationBar:
+          _AssistantBottomBar(onScanMeal: controller.analyzeMeal),
     );
   }
 }
@@ -112,22 +122,34 @@ class _InputBar extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 4,
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
-                  hintText: 'Ask Wellness AI...',
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                  suffixIcon: IconButton(
-                    tooltip: 'Send',
-                    onPressed: () => onSend(controller.text),
-                    icon: Icon(Icons.send, color: cs.onSurfaceVariant),
-                  ),
-                ),
-                onSubmitted: onSend,
+              child: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: controller,
+                builder: (context, value, _) {
+                  final hasText = value.text.trim().isNotEmpty;
+                  return TextField(
+                    controller: controller,
+                    minLines: 1,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: 'Ask Wellness AI...',
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      suffixIcon: IconButton(
+                        tooltip: 'Send',
+                        onPressed: hasText ? () => onSend(controller.text) : null,
+                        icon: Icon(
+                          Icons.send_rounded,
+                          // Disabled == grey (onSurfaceVariant), Enabled == primary (matches mic bg)
+                          color: hasText ? cs.primary : cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    onSubmitted: (t) {
+                      if (t.trim().isNotEmpty) onSend(t);
+                    },
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
@@ -167,8 +189,9 @@ class _AssistantBottomBar extends ConsumerWidget {
             IconButton(
               tooltip: 'Plan Day',
               icon: const Icon(Icons.checklist_rtl),
-              onPressed: () =>
-                  ref.read(aiChatControllerProvider.notifier).sendText('Plan my day'),
+              onPressed: () => ref
+                  .read(aiChatControllerProvider.notifier)
+                  .sendText('Plan my day'),
             ),
             IconButton(
               tooltip: 'Tips',
@@ -192,6 +215,109 @@ class _AssistantBottomBar extends ConsumerWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/* --------------------------- EMPTY CHAT HINT ------------------------------ */
+
+class _EmptyAssistantHint extends StatelessWidget {
+  const _EmptyAssistantHint({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome, color: color, size: 28),
+              const SizedBox(height: 12),
+              Text(
+                'Meet your AI Wellness Assistant',
+                style: t.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'I can help you stay on track with your health goals.',
+                style: t.bodyMedium?.copyWith(color: color),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              _HintBullet(
+                icon: Icons.fastfood_outlined,
+                text:
+                    'Scan your meals to estimate calories and nutrition values.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.schedule_outlined,
+                text: 'Plan your day with personalized routines and reminders.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.tips_and_updates_outlined,
+                text:
+                    'Get actionable tips based on your activity, sleep, and goals.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.self_improvement_outlined,
+                text:
+                    'Try quick mindfulness and breathing exercises to reset.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.explore_outlined,
+                text:
+                    'Ask about foods, symptoms, workouts, hydration, and more.',
+                color: color,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Tap the mic to dictate or type your question below.',
+                style: t.bodySmall?.copyWith(color: color),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HintBullet extends StatelessWidget {
+  const _HintBullet(
+      {required this.icon, required this.text, required this.color});
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: t.bodyMedium?.copyWith(color: color),
+            ),
+          ),
+        ],
       ),
     );
   }
