@@ -44,6 +44,7 @@ GoRouter buildRouter() {
       GoRoute(
         path: '/auth/signup',
         name: 'signup',
+        // Uses SignUpScreen (capital U) intentionally
         builder: (context, state) => const SignUpScreen(),
       ),
 

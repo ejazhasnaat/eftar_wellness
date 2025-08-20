@@ -6,6 +6,7 @@ import 'package:eftar_wellness/app/theme/app_theme.dart';
 import 'package:eftar_wellness/features/auth/application/auth_controller.dart';
 import 'package:eftar_wellness/features/auth/domain/user_path.dart';
 import 'package:eftar_wellness/features/auth/presentation/post_signup_routing.dart';
+import 'verify_email_screen.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -36,15 +37,25 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (!_form.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider).signUpWithEmail(
+      final userId = await ref.read(authControllerProvider).signUpWithEmail(
             name: _name.text.trim(),
             email: _email.text.trim(),
             password: _password.text,
-            phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
-            path: _path,
           );
       if (!mounted) return;
-      handlePostSignup(context, isExpert: _path == UserPath.expert);
+      final ok = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (_) => VerifyEmailScreen(
+                userId: userId,
+                email: _email.text.trim(),
+              ),
+            ),
+          ) ??
+          false;
+      if (!mounted) return;
+      if (ok) {
+        handlePostSignup(context, isExpert: _path == UserPath.expert);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

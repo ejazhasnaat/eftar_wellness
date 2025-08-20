@@ -1,154 +1,124 @@
-// lib/features/auth/application/auth_controller.dart
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
-import 'package:eftar_wellness/features/auth/domain/auth_repository.dart';
-import 'package:eftar_wellness/features/auth/domain/user_path.dart';
-import 'package:eftar_wellness/features/auth/data/auth_repository_prefs.dart';
+import '../../../data/local/kv_store.dart';
+import '../../../app/di/providers.dart';
+import '../domain/email_verification_service.dart';
+import '../data/email_verification_service_dev.dart';
+import '../domain/auth_repository.dart';
+import '../data/auth_repository_prefs.dart';
+import '../../../data/db/app_database.dart';
 
-/// DI: repository implementation (Prefs for now; swap to remote later)
+// DI providers
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryPrefs();
 });
 
-/// Lightweight auth state for UI: loading/error + signed-in flag.
-/// (Extend with user data later when your repository exposes it.)
-class AuthState {
-  final bool isLoading;
-  final String? error;
-  final bool isSignedIn;
+final kvStoreProvider = Provider<KvStore>((ref) => KvStore());
 
-  const AuthState({
-    required this.isLoading,
-    required this.isSignedIn,
-    this.error,
-  });
+final emailVerificationServiceProvider =
+    Provider<EmailVerificationService>((ref) => const DevEmailVerificationService());
 
-  const AuthState.initial()
-      : isLoading = false,
-        isSignedIn = false,
-        error = null;
+final authControllerProvider = Provider<AuthController>((ref) => AuthController(ref));
 
-  AuthState copyWith({
-    bool? isLoading,
-    bool? isSignedIn,
-    String? error, // pass empty string to clear error
-  }) {
-    return AuthState(
-      isLoading: isLoading ?? this.isLoading,
-      isSignedIn: isSignedIn ?? this.isSignedIn,
-      error: error == '' ? null : (error ?? this.error),
-    );
-  }
-}
-
-/// Primary state provider (watch this for reactive UI).
-final authStateProvider =
-    StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(ref);
-});
-
-/// Back-compat alias so existing screens that do:
-///   ref.read(authControllerProvider).signInWithEmail(...)
-/// continue to work without edits.
-/// It returns the controller (not state).
-final authControllerProvider = Provider<AuthController>((ref) {
-  return ref.read(authStateProvider.notifier);
-});
-
-class AuthController extends StateNotifier<AuthState> {
-  AuthController(this._ref) : super(const AuthState.initial());
+class AuthController {
+  AuthController(this._ref);
 
   final Ref _ref;
 
   AuthRepository get _repo => _ref.read(authRepositoryProvider);
+  KvStore get _kv => _ref.read(kvStoreProvider);
+  EmailVerificationService get _email =>
+      _ref.read(emailVerificationServiceProvider);
 
-  /// Initialize session (e.g., from SplashScreen).
-  Future<void> loadSession() async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      final signedIn = await _repo.isSignedIn();
-      state = state.copyWith(isLoading: false, isSignedIn: signedIn, error: '');
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: '$e', isSignedIn: false);
-    }
+  // helper keys
+  String _codeKey(String userId) => 'ev_code_' + userId;
+  String _expKey(String userId) => 'ev_exp_' + userId;
+  String _sentKey(String userId) => 'ev_sent_' + userId;
+  String _verKey(String userId) => 'ev_verified_' + userId;
+  String _uidKey(String email) => 'ev_uid_' + email;
+
+  String _hash(String code) => sha256.convert(utf8.encode(code)).toString();
+
+  String _generateCode() {
+    final r = Random.secure();
+    final n = r.nextInt(900000) + 100000; // 6-digit
+    return n.toString();
   }
 
-  Future<bool> signInWithEmail({
-    required String email,
-    required String password,
-  }) async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      await _repo.signInWithEmail(email: email, password: password);
-      state = state.copyWith(isLoading: false, isSignedIn: true);
-      return true;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, isSignedIn: false, error: '$e');
-      return false;
-    }
+  Future<void> _sendCode({required String userId, required String email}) async {
+    final code = _generateCode();
+    await _kv.putString(_codeKey(userId), _hash(code));
+    final now = DateTime.now();
+    await _kv.putInt(
+        _expKey(userId),
+        now.add(const Duration(minutes: 10)).millisecondsSinceEpoch);
+    await _kv.putInt(_sentKey(userId), now.millisecondsSinceEpoch);
+    await _email.sendVerification(email: email, code: code);
   }
 
-  Future<bool> signUpWithEmail({
+  Future<String> signUpWithEmail({
     required String name,
     required String email,
     required String password,
-    String? phone,
-    String? city,
-    String? country,
-    required UserPath path,
   }) async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      await _repo.signUpWithEmail(
-        name: name,
-        email: email,
-        password: password,
-        phone: phone,
-        city: city,
-        country: country,
-        path: path,
-      );
-      state = state.copyWith(isLoading: false, isSignedIn: true);
-      return true;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, isSignedIn: false, error: '$e');
-      return false;
-    }
+    final id = const Uuid().v4();
+    // store mapping for lookup during sign-in
+    await _kv.putString(_uidKey(email), id);
+    await _kv.putBool(_verKey(id), false);
+    // Save minimal user row locally
+    final repo = _ref.read(userRepositoryProvider);
+    await repo.save(User(id: id, name: name, email: email, createdAt: DateTime.now(), updatedAt: null));
+    await _sendCode(userId: id, email: email);
+    return id;
   }
 
-  Future<bool> signInWithGoogle() async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      await _repo.signInWithGoogle();
-      state = state.copyWith(isLoading: false, isSignedIn: true);
-      return true;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, isSignedIn: false, error: '$e');
-      return false;
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final userId = await _kv.getString(_uidKey(email));
+    if (userId == null) {
+      throw Exception('User not found');
     }
+    final verified = await isEmailVerified(userId);
+    if (!verified) {
+      throw Exception('Email not verified');
+    }
+    await _repo.signInWithEmail(email: email, password: password);
   }
 
-  Future<bool> signInWithApple() async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      await _repo.signInWithApple();
-      state = state.copyWith(isLoading: false, isSignedIn: true);
-      return true;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, isSignedIn: false, error: '$e');
-      return false;
+  Future<void> signInWithGoogle() => _repo.signInWithGoogle();
+  Future<void> signInWithApple() => _repo.signInWithApple();
+  Future<void> signOut() => _repo.signOut();
+
+  Future<void> confirmCode({required String userId, required String code}) async {
+    final storedHash = await _kv.getString(_codeKey(userId));
+    final exp = await _kv.getInt(_expKey(userId)) ?? 0;
+    if (storedHash == null || exp < DateTime.now().millisecondsSinceEpoch) {
+      throw Exception('Code expired');
     }
+    if (_hash(code) != storedHash) {
+      throw Exception('Invalid code');
+    }
+    await _kv.putBool(_verKey(userId), true);
+    await _kv.remove(_codeKey(userId));
+    await _kv.remove(_expKey(userId));
   }
 
-  Future<void> signOut() async {
-    state = state.copyWith(isLoading: true, error: '');
-    try {
-      await _repo.signOut();
-    } catch (_) {
-      // ignore errors for UX parity
-    } finally {
-      state = const AuthState.initial();
+  Future<void> resend({required String userId, required String email}) async {
+    final last = await _kv.getInt(_sentKey(userId)) ?? 0;
+    if (DateTime.now().millisecondsSinceEpoch - last < 60000) {
+      throw Exception('Please wait before requesting another code');
     }
+    await _sendCode(userId: userId, email: email);
+  }
+
+  Future<bool> isEmailVerified(String userId) async {
+    return await _kv.getBool(_verKey(userId)) ?? false;
   }
 }
-
