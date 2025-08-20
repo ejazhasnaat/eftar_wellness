@@ -5,23 +5,26 @@ class SocialButtons extends StatelessWidget {
     super.key,
     required this.onGoogle,
     required this.onApple,
+    this.enabled = true,
   });
 
   final VoidCallback onGoogle;
   final VoidCallback onApple;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
+        SizedBox(
+          width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: onGoogle,
-            icon: const Icon(Icons.g_mobiledata, size: 28), // simple placeholder icon
-            label: const Text('Google'),
+            onPressed: enabled ? onGoogle : null,
+            icon: const Icon(Icons.g_mobiledata, size: 28),
+            label: const Text('Continue with Google'),
             style: OutlinedButton.styleFrom(
               shape: shape,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -29,12 +32,13 @@ class SocialButtons extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: onApple,
+            onPressed: enabled ? onApple : null,
             icon: const Icon(Icons.apple, size: 20),
-            label: const Text('Apple'),
+            label: const Text('Continue with Apple'),
             style: OutlinedButton.styleFrom(
               shape: shape,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -46,4 +50,3 @@ class SocialButtons extends StatelessWidget {
     );
   }
 }
-

@@ -1,3 +1,4 @@
+// lib/features/ai_assistant/domain/ai_message.dart
 class AiMessage {
   final String content;
   final bool isUser;

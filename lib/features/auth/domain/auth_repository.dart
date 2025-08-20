@@ -1,5 +1,5 @@
 // lib/features/auth/domain/auth_repository.dart
-import 'user_path.dart';
+import 'package:eftar_wellness/features/auth/domain/user_path.dart';
 
 abstract class AuthRepository {
   Future<bool> isSignedIn();
@@ -23,4 +23,3 @@ abstract class AuthRepository {
     required String password,
   });
 }
-

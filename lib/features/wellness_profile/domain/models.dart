@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 enum Units { metric, imperial }
+
 enum Sex { male, female, preferNot }
 
 enum GoalPrimary {
@@ -188,7 +187,8 @@ class UserWellnessProfile {
   }
 
   static double? calcBmi({double? heightCm, double? weightKg}) {
-    if (heightCm == null || heightCm <= 0 || weightKg == null || weightKg <= 0) return null;
+    if (heightCm == null || heightCm <= 0 || weightKg == null || weightKg <= 0)
+      return null;
     final hM = heightCm / 100.0;
     return weightKg / (hM * hM);
   }
@@ -214,30 +214,43 @@ class UserWellnessProfile {
         'status': status.name,
       };
 
-  factory UserWellnessProfile.fromJson(Map<String, dynamic> j) => UserWellnessProfile(
-        units: Units.values.firstWhere((e) => e.name == (j['units'] ?? 'metric'), orElse: () => Units.metric),
-        sex: (j['sex'] == null) ? null : Sex.values.firstWhere((e) => e.name == j['sex']),
+  factory UserWellnessProfile.fromJson(Map<String, dynamic> j) =>
+      UserWellnessProfile(
+        units: Units.values.firstWhere(
+            (e) => e.name == (j['units'] ?? 'metric'),
+            orElse: () => Units.metric),
+        sex: (j['sex'] == null)
+            ? null
+            : Sex.values.firstWhere((e) => e.name == j['sex']),
         heightCm: (j['heightCm'] as num?)?.toDouble(),
         weightKg: (j['weightKg'] as num?)?.toDouble(),
         bmi: (j['bmi'] as num?)?.toDouble(),
         waistCm: (j['waistCm'] as num?)?.toDouble(),
         goalPrimary: (j['goalPrimary'] == null)
             ? null
-            : GoalPrimary.values.firstWhere((e) => e.name == j['goalPrimary'], orElse: () => GoalPrimary.stayFit),
+            : GoalPrimary.values.firstWhere((e) => e.name == j['goalPrimary'],
+                orElse: () => GoalPrimary.stayFit),
         goalOther: j['goalOther'] as String?,
-        medicalConditions: (j['medicalConditions'] as List?)?.cast<String>() ?? const [],
+        medicalConditions:
+            (j['medicalConditions'] as List?)?.cast<String>() ?? const [],
         allergies: (j['allergies'] as List?)?.cast<String>() ?? const [],
         intolerances: (j['intolerances'] as List?)?.cast<String>() ?? const [],
-        dietPreferences: (j['dietPreferences'] as List?)?.cast<String>() ?? const [],
-        habits: j['habits'] == null ? const Habits() : Habits.fromJson(j['habits'] as Map<String, dynamic>),
-        activity: j['activity'] == null ? const Activity() : Activity.fromJson(j['activity'] as Map<String, dynamic>),
+        dietPreferences:
+            (j['dietPreferences'] as List?)?.cast<String>() ?? const [],
+        habits: j['habits'] == null
+            ? const Habits()
+            : Habits.fromJson(j['habits'] as Map<String, dynamic>),
+        activity: j['activity'] == null
+            ? const Activity()
+            : Activity.fromJson(j['activity'] as Map<String, dynamic>),
         sleepHours: (j['sleepHours'] as num?)?.toDouble(),
         photoPath: j['photoPath'] as String?,
-        submittedAt: j['submittedAt'] == null ? null : DateTime.tryParse(j['submittedAt']),
+        submittedAt: j['submittedAt'] == null
+            ? null
+            : DateTime.tryParse(j['submittedAt']),
         status: ProfileStatus.values.firstWhere(
           (e) => e.name == (j['status'] ?? 'draft'),
           orElse: () => ProfileStatus.draft,
         ),
       );
 }
-

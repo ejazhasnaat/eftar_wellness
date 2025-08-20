@@ -9,22 +9,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod:
   go_router:
-  drift:
-  sqlite3_flutter_libs:
-  path_provider:
   uuid:
   shared_preferences:
   google_fonts: ^6.3.0
   file_picker: ^8.0.0
   image_picker: ^1.1.2
+  drift: ^2.18.0
+  drift_flutter: ^0.2.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  flutter_riverpod: ^2.5.1
+  riverpod: ^2.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner:
-  drift_dev:
+  build_runner: ^2.4.10
+  drift_dev: ^2.18.0
+  flutter_lints: ^3.0.2
 
 flutter:
   uses-material-design: true

@@ -1,4 +1,27 @@
+# analysis_options.yaml (replace with this if you're okay; safe defaults)
 include: package:flutter_lints/flutter.yaml
+
 analyzer:
   exclude:
     - lib/**.g.dart
+    - lib/**.freezed.dart
+    - lib/**.gr.dart
+  language:
+    strict-raw-types: true
+  errors:
+    invalid_use_of_visible_for_testing_member: error
+    missing_return: error
+    unused_import: warning
+    dead_code: warning
+
+linter:
+  rules:
+    # readability & safety
+    always_use_package_imports: true
+    avoid_print: true
+    avoid_unused_constructor_parameters: true
+    prefer_final_locals: true
+    prefer_final_in_for_each: true
+    unnecessary_late: true
+    avoid_redundant_argument_values: true
+

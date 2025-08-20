@@ -1,7 +1,7 @@
 // lib/features/auth/data/auth_repository_prefs.dart
 import 'package:shared_preferences/shared_preferences.dart';
-import '../domain/auth_repository.dart';
-import '../domain/user_path.dart';
+import 'package:eftar_wellness/features/auth/domain/auth_repository.dart';
+import 'package:eftar_wellness/features/auth/domain/user_path.dart';
 
 class AuthRepositoryPrefs implements AuthRepository {
   static const _kToken   = 'auth_token';
@@ -59,4 +59,3 @@ class AuthRepositoryPrefs implements AuthRepository {
     await p.setString(_kToken, 'email_dummy_token');
   }
 }
-

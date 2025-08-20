@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../auth/application/auth_controller.dart';
-import '../widgets/social_buttons.dart';
-import '../../../../app/theme/app_theme.dart';
 
-import '../../../../app/router.dart' show AppRoutes;
-import 'package:flutter/foundation.dart' show kDebugMode;
-import '../../../../../app/app.dart' show AppRoutes; // if AppRoutes is in app.dart
-
+import 'package:eftar_wellness/features/auth/application/auth_controller.dart';
+import 'package:eftar_wellness/features/auth/presentation/widgets/social_buttons.dart';
+import 'package:eftar_wellness/app/theme/app_theme.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -17,10 +13,9 @@ class SignInScreen extends ConsumerStatefulWidget {
 }
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _form = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _obscure = true;
   bool _busy = false;
 
   @override
@@ -31,15 +26,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   Future<void> _doEmail() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_form.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).signInWithEmail(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
-      if (!mounted) return;
-      context.go('/');
+      await ref.read(authControllerProvider).signInWithEmail(
+            email: _email.text.trim(),
+            password: _password.text,
+          );
+      if (mounted) context.go('/home');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -48,8 +42,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _doGoogle() async {
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).signInWithGoogle();
-      if (mounted) context.go('/');
+      await ref.read(authControllerProvider).signInWithGoogle();
+      if (mounted) context.go('/home');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -58,8 +52,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _doApple() async {
     setState(() => _busy = true);
     try {
-      await ref.read(authRepositoryProvider).signInWithApple();
-      if (mounted) context.go('/');
+      await ref.read(authControllerProvider).signInWithApple();
+      if (mounted) context.go('/home');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -67,85 +61,72 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-
+    final tt = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
-      body: AbsorbPointer(
-        absorbing: _busy,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text('Welcome back', style: tt.headlineSmall),
-            const SizedBox(height: 6),
-            Text('Sign in with Google/Apple or continue with email.',
-              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            SocialButtons(onGoogle: _doGoogle, onApple: _doApple),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: Divider(color: cs.outlineVariant)),
-              const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('or')),
-              Expanded(child: Divider(color: cs.outlineVariant)),
-            ]),
-            const SizedBox(height: 12),
-            Form(
-              key: _formKey,
+      body: SafeArea(
+        minimum: const EdgeInsets.all(16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Material(
-                    elevation: 2,
-                    shadowColor: AppTheme.kSoftShadow,
-                    borderRadius: BorderRadius.circular(14),
-                    child: TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (v) {
-                        final s = v?.trim() ?? '';
-                        if (s.isEmpty) return 'Email required';
-                        if (!s.contains('@') || !s.contains('.')) return 'Invalid email';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Material(
-                    elevation: 2,
-                    shadowColor: AppTheme.kSoftShadow,
-                    borderRadius: BorderRadius.circular(14),
-                    child: TextFormField(
-                      controller: _password,
-                      obscureText: _obscure,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        suffixIcon: IconButton(
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                          icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-                        ),
-                      ),
-                      validator: (v) => (v == null || v.length < 6) ? 'Min 6 chars' : null,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _busy ? null : _doEmail,
-                    child: _busy ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                                  : const Text('Sign in'),
-                  ),
+                  Text('Welcome back 👋', style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => context.push('/signup'),
-                    child: const Text("Don't have an account? Sign up"),
+                  Text('Sign in to continue your wellness journey.', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                  const SizedBox(height: 24),
+                  Form(
+                    key: _form,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _email,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(labelText: 'Email'),
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Email required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _password,
+                          obscureText: true,
+                          decoration: const InputDecoration(labelText: 'Password'),
+                          validator: (v) => (v == null || v.isEmpty) ? 'Password required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _busy ? null : _doEmail,
+                            child: _busy ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Sign in'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  SocialButtons(onGoogle: _doGoogle, onApple: _doApple, enabled: !_busy),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: _busy ? null : () => context.go('/auth/signup'),
+                        child: const Text('Create one'),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-

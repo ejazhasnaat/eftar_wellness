@@ -1,8 +1,11 @@
+// lib/features/settings/presentation/screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../app/theme/theme_controller.dart';
-import '../../../profile/presentation/health_info_settings_tile.dart';
+
+import 'package:eftar_wellness/app/theme/theme_controller.dart';
+import 'package:eftar_wellness/core/dev/reset_utils.dart';
+import 'package:eftar_wellness/features/profile/presentation/health_info_settings_tile.dart';
 
 /// App Settings (Profile → Settings).
 /// Canonical settings screen (use this one in routes).
@@ -62,6 +65,49 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
+          // Developer / Debug — reset actions.
+          const _SectionLabel('Developer'),
+          _Tile(
+            leading: const Icon(Icons.cleaning_services_outlined),
+            title: 'Reset app (DB + preferences)',
+            subtitle: 'Factory reset: clears local DB and SharedPreferences',
+            onTap: () async {
+              await ResetUtils.resetAll(ref);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('App reset complete')),
+                );
+              }
+            },
+          ),
+          _Tile(
+            leading: const Icon(Icons.storage_outlined),
+            title: 'Delete local database only',
+            subtitle: 'Remove eftar.db from app documents directory',
+            onTap: () async {
+              await ResetUtils.deleteDb(ref);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Local DB deleted')),
+                );
+              }
+            },
+          ),
+          _Tile(
+            leading: const Icon(Icons.settings_backup_restore_outlined),
+            title: 'Clear preferences only',
+            subtitle: 'SharedPreferences (sign-in state, simple settings)',
+            onTap: () async {
+              await ResetUtils.clearPrefs();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Preferences cleared')),
+                );
+              }
+            },
+          ),
+
+          const SizedBox(height: 24),
           OutlinedButton.icon(
             icon: const Icon(Icons.logout),
             onPressed: () => context.push('/signout'),
@@ -131,4 +177,3 @@ class _Tile extends StatelessWidget {
     );
   }
 }
-

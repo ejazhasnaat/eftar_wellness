@@ -1,48 +1,93 @@
 // lib/app/router.dart
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/home/presentation/screens/home_screen.dart';
-import '../features/settings/presentation/screens/settings_screen.dart';
-import '../features/auth/presentation/screens/splash_screen.dart';
-import '../features/auth/presentation/screens/signin_screen.dart';
-import '../features/auth/presentation/screens/signup_screen.dart';
-import '../features/onboarding/presentation/expert_details_screen.dart';
-import '../features/onboarding/presentation/approval_status_screen.dart';
-import '../features/wellness_profile/presentation/body_step_screen.dart';
-import '../features/wellness_profile/presentation/goals_step_screen.dart';
-import '../features/ai_assistant/presentation/screens/ai_chat_screen.dart';
+import 'package:eftar_wellness/features/home/presentation/screens/home_screen.dart';
+import 'package:eftar_wellness/features/settings/presentation/screens/settings_screen.dart';
+import 'package:eftar_wellness/features/auth/presentation/screens/splash_screen.dart';
+import 'package:eftar_wellness/features/auth/presentation/screens/signin_screen.dart';
+import 'package:eftar_wellness/features/auth/presentation/screens/signup_screen.dart';
+import 'package:eftar_wellness/features/onboarding/presentation/expert_details_screen.dart';
+import 'package:eftar_wellness/features/onboarding/presentation/approval_status_screen.dart';
+import 'package:eftar_wellness/features/wellness_profile/presentation/body_step_screen.dart';
+import 'package:eftar_wellness/features/wellness_profile/presentation/goals_step_screen.dart';
+import 'package:eftar_wellness/features/ai_assistant/presentation/screens/ai_chat_screen.dart';
 
-final appRouterProvider = Provider<GoRouter>((ref) {
+/// Builds the app router. Paths and screens preserved deliberately.
+GoRouter buildRouter() {
   return GoRouter(
-    initialLocation: '/splash',
-    routes: [
+    initialLocation: '/home',
+    routes: <RouteBase>[
+      // Home & settings
       GoRoute(
-          path: '/splash', builder: (context, state) => const SplashScreen()),
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
+      ),
       GoRoute(
-          path: '/signin', builder: (context, state) => const SignInScreen()),
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+
+      // Auth
       GoRoute(
-          path: '/signup', builder: (context, state) => const SignUpScreen()),
-      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+        path: '/auth/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsScreen()),
+        path: '/auth/signin',
+        name: 'signin',
+        builder: (context, state) => const SignInScreen(),
+      ),
       GoRoute(
-          path: '/onboard/expert',
-          builder: (context, state) => const ExpertDetailsScreen()),
+        path: '/auth/signup',
+        name: 'signup',
+        builder: (context, state) => const SignUpScreen(),
+      ),
+
+      // Onboarding (experts)
       GoRoute(
-          path: '/expert/approval-status',
-          builder: (context, state) => const ExpertApprovalStatusScreen()),
+        path: '/expert/details',
+        name: 'expert_details',
+        builder: (context, state) => const ExpertDetailsScreen(),
+      ),
       GoRoute(
-          path: '/onboard/wellness/body',
-          builder: (context, state) => const BodyStepScreen()),
+        path: '/expert/approval-status',
+        name: 'expert_approval_status',
+        builder: (context, state) => const ExpertApprovalStatusScreen(),
+      ),
+
+      // Onboarding (wellness profile)
       GoRoute(
-          path: '/onboard/wellness/goals',
-          builder: (context, state) => const GoalsStepScreen()),
+        path: '/onboard/wellness/body',
+        name: 'onboard_wellness_body',
+        builder: (context, state) => const BodyStepScreen(),
+      ),
       GoRoute(
-          path: '/assistant',
-          builder: (context, state) => const AiChatScreen()),
+        path: '/onboard/wellness/goals',
+        name: 'onboard_wellness_goals',
+        builder: (context, state) => const GoalsStepScreen(),
+      ),
+
+      // AI Assistant
+      GoRoute(
+        path: '/assistant',
+        name: 'assistant',
+        builder: (context, state) => const AiChatScreen(),
+      ),
+
+      // Optional landing redirect (no-op safe)
+      GoRoute(
+        path: '/',
+        name: 'root_redirect',
+        builder: (context, state) => const HomeScreen(),
+      ),
     ],
   );
-});
+}
+
+/// Expose a provider here too if you prefer consuming directly from this file.
+final routerProvider = Provider<GoRouter>((ref) => buildRouter());
+

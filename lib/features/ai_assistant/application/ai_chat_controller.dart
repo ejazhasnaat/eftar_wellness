@@ -1,12 +1,19 @@
+// lib/features/ai_assistant/application/ai_chat_controller.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:eftar_wellness/features/ai_assistant/domain/ai_message.dart';
+import 'package:eftar_wellness/features/ai_assistant/domain/ai_assistant_repository.dart';
+import 'package:eftar_wellness/features/ai_assistant/data/ai_assistant_repository_local.dart';
 
-import '../domain/ai_message.dart';
-import '../data/ai_assistant_repository.dart';
+/// DI for the AI Assistant repository (local by default; swappable later).
+final aiAssistantRepositoryProvider = Provider<AiAssistantRepository>((ref) {
+  return AiAssistantRepositoryLocal();
+});
 
+/// Chat controller managing the conversation state.
 final aiChatControllerProvider =
     StateNotifierProvider<AiChatController, List<AiMessage>>((ref) {
-  final repo = AiAssistantRepository();
-  return AiChatController(repo);
+  final repo = ref.read(aiAssistantRepositoryProvider);
+  return AiChatController(repo)..loadHistory();
 });
 
 class AiChatController extends StateNotifier<List<AiMessage>> {
@@ -14,10 +21,15 @@ class AiChatController extends StateNotifier<List<AiMessage>> {
 
   final AiAssistantRepository _repo;
 
-  Future<void> sendText(String text) async {
-    if (text.trim().isEmpty) return;
-    state = [...state, AiMessage(content: text, isUser: true)];
-    final reply = await _repo.sendText(text);
+  void loadHistory() {
+    state = List.of(_repo.history);
+  }
+
+  Future<void> sendText(String message) async {
+    if (message.trim().isEmpty) return;
+    // Optimistic user message for responsive UI
+    state = [...state, AiMessage(content: message, isUser: true)];
+    final reply = await _repo.sendText(message);
     state = [...state, AiMessage(content: reply, isUser: false)];
   }
 

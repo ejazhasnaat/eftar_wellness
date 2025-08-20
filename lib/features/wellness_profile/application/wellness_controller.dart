@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/models.dart';
-import '../data/user_wellness_repository_prefs.dart';
+import '../domain/repository.dart';                       // ⬅️ domain contract
+import '../data/user_wellness_repository_prefs.dart';    // ⬅️ current impl
 
-/// Repository DI
+/// Repository DI (typed to domain)
 final userWellnessRepositoryProvider = Provider<UserWellnessRepository>((ref) {
-  return UserWellnessRepositoryPrefs(); // swap with Supabase later
+  return UserWellnessRepositoryPrefs(); // swap to Drift/Supabase later
 });
 
 /// State
@@ -15,19 +16,21 @@ final wellnessProfileProvider =
 
 class WellnessController extends StateNotifier<UserWellnessProfile> {
   WellnessController(this._ref) : super(const UserWellnessProfile()) {
-    _init();
+    _load();
   }
 
   final Ref _ref;
 
-  Future<void> _init() async {
-    final loaded = await _ref.read(userWellnessRepositoryProvider).load();
+  UserWellnessRepository get _repo => _ref.read(userWellnessRepositoryProvider);
+
+  Future<void> _load() async {
+    final loaded = await _repo.load();
     state = loaded;
   }
 
-  Future<void> _persist(UserWellnessProfile next) async {
-    state = next;
-    await _ref.read(userWellnessRepositoryProvider).save(next);
+  Future<void> _persist(UserWellnessProfile p) async {
+    state = p;
+    await _repo.save(state);
   }
 
   // ---------- Basics ----------
