@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eftar_wellness/app/theme/theme_controller.dart';
 import 'package:eftar_wellness/core/dev/reset_utils.dart';
 import 'package:eftar_wellness/features/profile/presentation/health_info_settings_tile.dart';
+import 'package:eftar_wellness/features/auth/application/auth_controller.dart';
 
 /// App Settings (Profile → Settings).
 /// Canonical settings screen (use this one in routes).
@@ -110,7 +111,12 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           OutlinedButton.icon(
             icon: const Icon(Icons.logout),
-            onPressed: () => context.push('/signout'),
+            onPressed: () async {
+              await ref.read(authControllerProvider).signOut();
+              if (context.mounted) {
+                context.go('/auth/signin');
+              }
+            },
             label: const Text('Sign out'),
           ),
           const SizedBox(height: 8),

@@ -76,7 +76,7 @@ class _CompactHeader extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'Hi, Seeker',
+            'Hi there',
             style: Theme.of(context)
                 .textTheme
                 .titleLarge

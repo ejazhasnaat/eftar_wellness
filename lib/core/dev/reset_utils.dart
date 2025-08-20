@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:eftar_wellness/app/di/db_providers.dart';
+import 'package:eftar_wellness/app/di/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Dev helper to reset local app state.
@@ -28,7 +28,7 @@ class ResetUtils {
       } catch (_) {}
       final docs = await getApplicationDocumentsDirectory();
       final sep = Platform.pathSeparator;
-      final dbFile = File('${docs.path}${sep}eftar.db');
+      final dbFile = File('${docs.path}${sep}wellness.sqlite');
       if (await dbFile.exists()) {
         await dbFile.delete();
       }
