@@ -1,220 +1,50 @@
+// lib/features/ai_assistant/presentation/screens/ai_chat_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../application/ai_chat_controller.dart';
-import '../../domain/ai_message.dart';
-import '../../../../core/constants/feature_flags.dart';
+import '../../domain/entities/intent.dart' as ai;
+import '../../application/providers.dart';
+import '../widgets/message_bubble.dart';
+import '../widgets/chat_input_bar.dart';
+import '../widgets/smart_action_chips.dart';
 
-class AiChatScreen extends ConsumerStatefulWidget {
+class AiChatScreen extends ConsumerWidget {
   const AiChatScreen({super.key});
 
   @override
-  ConsumerState<AiChatScreen> createState() => _AiChatScreenState();
-}
-
-class _AiChatScreenState extends ConsumerState<AiChatScreen> {
-  final _textController = TextEditingController();
-  final _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final messages = ref.watch(aiChatControllerProvider);
-    final controller = ref.read(aiChatControllerProvider.notifier);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(assistantControllerProvider);
+    final controller = ref.read(assistantControllerProvider.notifier);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.home),
-          onPressed: () => context.go('/'),
-        ),
-        title: Text(
-          'AI Wellness Assistant',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Clear chat',
-            icon: const Icon(Icons.clear_all),
-            onPressed: controller.clearChat,
-          ),
-        ],
+        title: const Text('AI Wellness Assistant'),
       ),
       body: Column(
         children: [
           Expanded(
-            child: messages.isEmpty
+            child: state.messages.isEmpty
                 ? _EmptyAssistantHint(color: cs.onSurfaceVariant)
                 : ListView.builder(
-                    controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
+                    itemCount: state.messages.length,
                     itemBuilder: (context, index) {
-                      final m = messages[index];
-                      return Align(
-                        alignment: m.isUser
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          decoration: BoxDecoration(
-                            color: m.isUser
-                                ? cs.primaryContainer
-                                : cs.surfaceVariant,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(m.content),
-                        ),
-                      );
+                      final msg = state.messages[index];
+                      return MessageBubble(message: msg);
                     },
                   ),
           ),
-          _InputBar(
-            controller: _textController,
-            onSend: (text) async {
-              final trimmed = text.trim();
-              if (trimmed.isEmpty) return;
-              await controller.sendText(trimmed);
-              _textController.clear();
-              // Ensure we auto-scroll to the latest message
-              await Future.delayed(const Duration(milliseconds: 50));
-              if (_scrollController.hasClients) {
-                _scrollController.animateTo(
-                  _scrollController.position.maxScrollExtent + 60,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              }
+          SmartActionChips(
+            onSelected: (intent) {
+              controller.handleIntent(ai.Intent(intent));
             },
           ),
+          ChatInputBar(
+            onSend: controller.send,
+          ),
         ],
-      ),
-      bottomNavigationBar:
-          _AssistantBottomBar(onScanMeal: controller.analyzeMeal),
-    );
-  }
-}
-
-class _InputBar extends ConsumerWidget {
-  const _InputBar({required this.controller, required this.onSend});
-  final TextEditingController controller;
-  final Future<void> Function(String text) onSend;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final canVoice = FeatureFlags.aiAssistantVoice;
-    final cs = Theme.of(context).colorScheme;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            Expanded(
-              child: ValueListenableBuilder<TextEditingValue>(
-                valueListenable: controller,
-                builder: (context, value, _) {
-                  final hasText = value.text.trim().isNotEmpty;
-                  return TextField(
-                    controller: controller,
-                    minLines: 1,
-                    maxLines: 4,
-                    keyboardType: TextInputType.multiline,
-                    decoration: InputDecoration(
-                      hintText: 'Ask Wellness AI...',
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                      suffixIcon: IconButton(
-                        tooltip: 'Send',
-                        onPressed: hasText ? () => onSend(controller.text) : null,
-                        icon: Icon(
-                          Icons.send_rounded,
-                          // Disabled == grey (onSurfaceVariant), Enabled == primary (matches mic bg)
-                          color: hasText ? cs.primary : cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    onSubmitted: (t) {
-                      if (t.trim().isNotEmpty) onSend(t);
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            if (canVoice)
-              SizedBox(
-                height: 48,
-                width: 48,
-                child: FloatingActionButton.small(
-                  heroTag: '_mic_ai',
-                  tooltip: 'Mic',
-                  onPressed: () {
-                    // Placeholder: replace with speech_to_text later
-                    controller.text = "🎤 Listening...";
-                  },
-                  child: const Icon(Icons.mic_none),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AssistantBottomBar extends ConsumerWidget {
-  const _AssistantBottomBar({required this.onScanMeal});
-  final Future<void> Function() onScanMeal;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return BottomAppBar(
-      child: SafeArea(
-        top: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              tooltip: 'Plan Day',
-              icon: const Icon(Icons.checklist_rtl),
-              onPressed: () => ref
-                  .read(aiChatControllerProvider.notifier)
-                  .sendText('Plan my day'),
-            ),
-            IconButton(
-              tooltip: 'Tips',
-              icon: const Icon(Icons.tips_and_updates_outlined),
-              onPressed: () => ref
-                  .read(aiChatControllerProvider.notifier)
-                  .sendText('Give me personalized tips'),
-            ),
-            IconButton(
-              tooltip: 'Mindfulness',
-              icon: const Icon(Icons.self_improvement),
-              onPressed: () => ref
-                  .read(aiChatControllerProvider.notifier)
-                  .sendText('Mindfulness exercises'),
-            ),
-            if (FeatureFlags.aiAssistantScanMeal)
-              IconButton(
-                tooltip: 'Scan Meal',
-                icon: const Icon(Icons.document_scanner),
-                onPressed: onScanMeal,
-              ),
-          ],
-        ),
       ),
     );
   }
@@ -246,43 +76,46 @@ class _EmptyAssistantHint extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'I can help you stay on track with your health goals.',
+                'Your personal coach for meals, workouts, and daily wellness. '
+                'I adapt to your goals and suggest quick Smart Actions.',
                 style: t.bodyMedium?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               _HintBullet(
                 icon: Icons.fastfood_outlined,
-                text:
-                    'Scan your meals to estimate calories and nutrition values.',
+                text: 'Scan meals for calories, nutrition, and healthier swaps.',
                 color: color,
               ),
               _HintBullet(
-                icon: Icons.schedule_outlined,
-                text: 'Plan your day with personalized routines and reminders.',
-                color: color,
-              ),
-              _HintBullet(
-                icon: Icons.tips_and_updates_outlined,
-                text:
-                    'Get actionable tips based on your activity, sleep, and goals.',
+                icon: Icons.mic_none_outlined,
+                text: 'Hands-free voice coaching with timely prompts.',
                 color: color,
               ),
               _HintBullet(
                 icon: Icons.self_improvement_outlined,
-                text:
-                    'Try quick mindfulness and breathing exercises to reset.',
+                text: 'Quick mental resets: breathing, focus, and confidence.',
                 color: color,
               ),
               _HintBullet(
-                icon: Icons.explore_outlined,
-                text:
-                    'Ask about foods, symptoms, workouts, hydration, and more.',
+                icon: Icons.emoji_events_outlined,
+                text: 'Join challenges, track streaks, and earn achievements.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.event_outlined,
+                text: 'Plan meals, workouts, and recovery into your day.',
+                color: color,
+              ),
+              _HintBullet(
+                icon: Icons.hourglass_top_outlined,
+                text: 'Explore fasting cycles, recovery, and longevity tips.',
                 color: color,
               ),
               const SizedBox(height: 16),
               Text(
-                'Tap the mic to dictate or type your question below.',
+                'Tip: Use Smart Action Chips (Log Water, Log Meal, Start Run) '
+                'or tap the mic to begin.',
                 style: t.bodySmall?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),

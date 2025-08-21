@@ -78,6 +78,11 @@ GoRouter buildRouter() {
         name: 'assistant',
         builder: (context, state) => const AiChatScreen(),
       ),
+      GoRoute(
+        path: '/assistant/chat',
+        name: 'assistant_chat',
+        builder: (context, state) => const AiChatScreen(),
+      ),
 
       // Optional landing redirect (no-op safe)
       GoRoute(
