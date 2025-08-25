@@ -56,6 +56,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       if (ok) {
         handlePostSignup(context, isExpert: _path == UserPath.expert);
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$e')));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -25,12 +25,6 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const _SectionLabel('Account'),
-          _Tile(
-            leading: const Icon(Icons.person_outline),
-            title: 'Profile',
-            subtitle: 'Name, email, phone',
-            onTap: () => context.push('/profile/edit'),
-          ),
           // Health Info editor → review screen with per-section edit buttons
           const HealthInfoSettingsTile(),
           const SizedBox(height: 12),

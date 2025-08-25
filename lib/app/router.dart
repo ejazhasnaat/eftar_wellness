@@ -7,11 +7,13 @@ import 'package:eftar_wellness/features/settings/presentation/screens/settings_s
 import 'package:eftar_wellness/features/auth/presentation/screens/splash_screen.dart';
 import 'package:eftar_wellness/features/auth/presentation/screens/signin_screen.dart';
 import 'package:eftar_wellness/features/auth/presentation/screens/signup_screen.dart';
+import 'package:eftar_wellness/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:eftar_wellness/features/onboarding/presentation/expert_details_screen.dart';
 import 'package:eftar_wellness/features/onboarding/presentation/approval_status_screen.dart';
 import 'package:eftar_wellness/features/wellness_profile/presentation/body_step_screen.dart';
 import 'package:eftar_wellness/features/wellness_profile/presentation/goals_step_screen.dart';
 import 'package:eftar_wellness/features/ai_assistant/presentation/screens/ai_chat_screen.dart';
+import 'package:eftar_wellness/features/profile/presentation/profile_edit_screen.dart';
 
 /// Builds the app router. Paths and screens preserved deliberately.
 GoRouter buildRouter() {
@@ -28,6 +30,11 @@ GoRouter buildRouter() {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        name: 'profile_edit',
+        builder: (context, state) => const ProfileEditScreen(),
       ),
 
       // Auth
@@ -46,6 +53,11 @@ GoRouter buildRouter() {
         name: 'signup',
         // Uses SignUpScreen (capital U) intentionally
         builder: (context, state) => const SignUpScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset-password',
+        name: 'reset_password',
+        builder: (context, state) => const ResetPasswordScreen(),
       ),
 
       // Onboarding (experts)

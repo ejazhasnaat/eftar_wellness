@@ -34,6 +34,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             password: _password.text,
           );
       if (mounted) context.go('/home');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('$e')));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -101,6 +106,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           child: FilledButton(
                             onPressed: _busy ? null : _doEmail,
                             child: _busy ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Sign in'),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _busy ? null : () => context.go('/auth/reset-password'),
+                            child: const Text('Forgot password?'),
                           ),
                         ),
                       ],

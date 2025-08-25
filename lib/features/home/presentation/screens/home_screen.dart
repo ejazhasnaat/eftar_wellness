@@ -8,6 +8,7 @@ import '../widgets/assistant_row.dart';
 import '../widgets/trackers_grid.dart';
 import '../widgets/recommendation_scroller.dart';
 import '../widgets/glass_panel.dart';
+import '../../application/current_user_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -63,20 +64,23 @@ class HomeScreen extends ConsumerWidget {
 
 /* ----------------------------- HEADER (compact) --------------------------- */
 
-class _CompactHeader extends StatelessWidget {
+class _CompactHeader extends ConsumerWidget {
   const _CompactHeader({required this.height, required this.r});
   final double height;
   final double r;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final user = ref.watch(currentUserProvider).asData?.value;
+    final name = user?.name.split(' ').first ?? 'there';
+
     return SizedBox(
       height: height,
       child: Row(
         children: [
           Text(
-            'Hi there',
+            'Hi $name',
             style: Theme.of(context)
                 .textTheme
                 .titleLarge
@@ -113,13 +117,16 @@ class _CompactHeader extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           InkWell(
-            onTap: () {},
+            onTap: () => context.push('/profile/edit'),
             borderRadius: BorderRadius.circular(r),
             child: CircleAvatar(
               radius: 16,
               backgroundColor: cs.primaryContainer,
-              child:
-                  Icon(Icons.person, color: cs.onPrimaryContainer, size: 18),
+              child: Icon(
+                Icons.person,
+                color: cs.onPrimaryContainer,
+                size: 18,
+              ),
             ),
           ),
         ],
@@ -514,11 +521,6 @@ class _BottomNav extends StatelessWidget {
           icon: Icon(Icons.bar_chart_outlined),
           selectedIcon: Icon(Icons.bar_chart),
           label: 'Track',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'Me',
         ),
       ],
       selectedIndex: 0,

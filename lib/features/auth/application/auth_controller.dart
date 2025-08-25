@@ -41,6 +41,7 @@ class AuthController {
   String _sentKey(String userId) => 'ev_sent_' + userId;
   String _verKey(String userId) => 'ev_verified_' + userId;
   String _uidKey(String email) => 'ev_uid_' + email;
+  String _pwdKey(String userId) => 'ev_pwd_' + userId;
 
   String _hash(String code) => sha256.convert(utf8.encode(code)).toString();
 
@@ -66,13 +67,20 @@ class AuthController {
     required String email,
     required String password,
   }) async {
+    if (await _kv.getString(_uidKey(email)) != null) {
+      throw Exception('Email already in use');
+    }
     final id = const Uuid().v4();
-    // store mapping for lookup during sign-in
     await _kv.putString(_uidKey(email), id);
     await _kv.putBool(_verKey(id), false);
-    // Save minimal user row locally
+    await _kv.putString(_pwdKey(id), _hash(password));
     final repo = _ref.read(userRepositoryProvider);
-    await repo.save(User(id: id, name: name, email: email, createdAt: DateTime.now(), updatedAt: null));
+    await repo.save(User(
+        id: id,
+        name: name,
+        email: email,
+        createdAt: DateTime.now(),
+        updatedAt: null));
     await _sendCode(userId: id, email: email);
     return id;
   }
@@ -89,12 +97,37 @@ class AuthController {
     if (!verified) {
       throw Exception('Email not verified');
     }
+    final storedHash = await _kv.getString(_pwdKey(userId));
+    if (storedHash != _hash(password)) {
+      throw Exception('Invalid credentials');
+    }
     await _repo.signInWithEmail(email: email, password: password);
   }
 
   Future<void> signInWithGoogle() => _repo.signInWithGoogle();
   Future<void> signInWithApple() => _repo.signInWithApple();
   Future<void> signOut() => _repo.signOut();
+
+  Future<void> requestPasswordReset({required String email}) async {
+    final userId = await _kv.getString(_uidKey(email));
+    if (userId == null) {
+      throw Exception('User not found');
+    }
+    await _sendCode(userId: userId, email: email);
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final userId = await _kv.getString(_uidKey(email));
+    if (userId == null) {
+      throw Exception('User not found');
+    }
+    await confirmCode(userId: userId, code: code);
+    await _kv.putString(_pwdKey(userId), _hash(newPassword));
+  }
 
   Future<void> confirmCode({required String userId, required String code}) async {
     final storedHash = await _kv.getString(_codeKey(userId));
