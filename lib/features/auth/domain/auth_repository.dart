@@ -8,7 +8,7 @@ abstract class AuthRepository {
   Future<void> signInWithGoogle();
   Future<void> signInWithApple();
 
-  Future<void> signUpWithEmail({
+  Future<String> signUpWithEmail({
     required String name,
     required String email,
     required String password,
@@ -22,4 +22,14 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  Future<void> sendPasswordReset({required String email});
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
+
+  Stream<dynamic> get onAuthStateChanged;
 }

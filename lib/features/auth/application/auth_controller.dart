@@ -7,21 +7,33 @@ import 'package:uuid/uuid.dart';
 
 import '../../../data/local/kv_store.dart';
 import '../../../app/di/providers.dart';
+import '../infrastructure/supabase/auth_repository_supabase.dart';
+import '../infrastructure/supabase/email_verification_service_supabase.dart';
 import '../domain/email_verification_service.dart';
 import '../data/email_verification_service_dev.dart';
 import '../domain/auth_repository.dart';
 import '../data/auth_repository_prefs.dart';
+import '../domain/user_path.dart';
 import '../../../data/db/app_database.dart';
+import '../../../core/constants/feature_flags.dart';
 
 // DI providers
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  if (FeatureFlags.useSupabaseAuth) {
+    return AuthRepositorySupabase(ref.read(supabaseClientProvider));
+  }
   return AuthRepositoryPrefs();
 });
 
 final kvStoreProvider = Provider<KvStore>((ref) => KvStore());
 
 final emailVerificationServiceProvider =
-    Provider<EmailVerificationService>((ref) => const DevEmailVerificationService());
+    Provider<EmailVerificationService>((ref) {
+  if (FeatureFlags.useSupabaseAuth) {
+    return EmailVerificationServiceSupabase(ref.read(supabaseClientProvider));
+  }
+  return const DevEmailVerificationService();
+});
 
 final authControllerProvider = Provider<AuthController>((ref) => AuthController(ref));
 
@@ -52,6 +64,10 @@ class AuthController {
   }
 
   Future<void> _sendCode({required String userId, required String email}) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _email.sendVerification(email: email, code: '');
+      return;
+    }
     final code = _generateCode();
     await _kv.putString(_codeKey(userId), _hash(code));
     final now = DateTime.now();
@@ -66,7 +82,18 @@ class AuthController {
     required String name,
     required String email,
     required String password,
+    required UserPath path,
   }) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      final id = await _repo.signUpWithEmail(
+        name: name,
+        email: email,
+        password: password,
+        path: path,
+      );
+      await _email.sendVerification(email: email, code: '');
+      return id;
+    }
     if (await _kv.getString(_uidKey(email)) != null) {
       throw Exception('Email already in use');
     }
@@ -89,6 +116,10 @@ class AuthController {
     required String email,
     required String password,
   }) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _repo.signInWithEmail(email: email, password: password);
+      return;
+    }
     final userId = await _kv.getString(_uidKey(email));
     if (userId == null) {
       throw Exception('User not found');
@@ -109,6 +140,10 @@ class AuthController {
   Future<void> signOut() => _repo.signOut();
 
   Future<void> requestPasswordReset({required String email}) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _repo.sendPasswordReset(email: email);
+      return;
+    }
     final userId = await _kv.getString(_uidKey(email));
     if (userId == null) {
       throw Exception('User not found');
@@ -121,15 +156,31 @@ class AuthController {
     required String code,
     required String newPassword,
   }) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _repo.resetPassword(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
+      return;
+    }
     final userId = await _kv.getString(_uidKey(email));
     if (userId == null) {
       throw Exception('User not found');
     }
-    await confirmCode(userId: userId, code: code);
+    await confirmCode(userId: userId, email: email, code: code);
     await _kv.putString(_pwdKey(userId), _hash(newPassword));
   }
 
-  Future<void> confirmCode({required String userId, required String code}) async {
+  Future<void> confirmCode({
+    required String userId,
+    required String email,
+    required String code,
+  }) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _email.verify(email: email, code: code);
+      return;
+    }
     final storedHash = await _kv.getString(_codeKey(userId));
     final exp = await _kv.getInt(_expKey(userId)) ?? 0;
     if (storedHash == null || exp < DateTime.now().millisecondsSinceEpoch) {
@@ -144,6 +195,10 @@ class AuthController {
   }
 
   Future<void> resend({required String userId, required String email}) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      await _email.sendVerification(email: email, code: '');
+      return;
+    }
     final last = await _kv.getInt(_sentKey(userId)) ?? 0;
     if (DateTime.now().millisecondsSinceEpoch - last < 60000) {
       throw Exception('Please wait before requesting another code');
@@ -152,6 +207,11 @@ class AuthController {
   }
 
   Future<bool> isEmailVerified(String userId) async {
+    if (FeatureFlags.useSupabaseAuth) {
+      final session =
+          _ref.read(supabaseClientProvider).auth.currentSession;
+      return session?.user.emailConfirmedAt != null;
+    }
     return await _kv.getBool(_verKey(userId)) ?? false;
   }
 }

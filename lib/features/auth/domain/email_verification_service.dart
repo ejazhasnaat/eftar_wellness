@@ -4,4 +4,9 @@ abstract class EmailVerificationService {
     required String code,
     Uri? magicLink,
   });
+
+  Future<void> verify({
+    required String email,
+    required String code,
+  });
 }

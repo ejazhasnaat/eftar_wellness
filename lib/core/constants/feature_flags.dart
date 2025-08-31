@@ -16,6 +16,7 @@ class FeatureFlags {
   // Phase 6–7 flags
   static const cloudSyncEnabled = false;       // master switch for sync engine
   static const supabaseRemoteEnabled = false;  // wire RemoteDataSource when true
+  static const useSupabaseAuth = true;
   static const llmOnlineEnabled = false;       // cloud LLM coaching (cohort gated)
   static const visionOnlineEnabled = false;    // cloud vision (meals)
   static const sttOnlineEnabled = false;       // cloud STT

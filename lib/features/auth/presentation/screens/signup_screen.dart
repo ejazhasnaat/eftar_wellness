@@ -41,6 +41,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             name: _name.text.trim(),
             email: _email.text.trim(),
             password: _password.text,
+            path: _path,
           );
       if (!mounted) return;
       final ok = await Navigator.of(context).push<bool>(

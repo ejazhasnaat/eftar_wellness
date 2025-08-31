@@ -40,6 +40,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     try {
       await ref.read(authControllerProvider).confirmCode(
             userId: widget.userId,
+            email: widget.email,
             code: _code.text.trim(),
           );
       if (mounted) Navigator.of(context).pop(true);

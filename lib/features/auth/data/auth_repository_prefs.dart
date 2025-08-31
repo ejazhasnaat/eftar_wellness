@@ -34,7 +34,7 @@ class AuthRepositoryPrefs implements AuthRepository {
   }
 
   @override
-  Future<void> signUpWithEmail({
+  Future<String> signUpWithEmail({
     required String name,
     required String email,
     required String password,
@@ -48,6 +48,7 @@ class AuthRepositoryPrefs implements AuthRepository {
     await p.setString(_kPath, path.name);
     if (city != null) await p.setString(_kCity, city);
     if (country != null) await p.setString(_kCountry, country);
+    return email;
   }
 
   @override
@@ -58,4 +59,21 @@ class AuthRepositoryPrefs implements AuthRepository {
     final p = await SharedPreferences.getInstance();
     await p.setString(_kToken, 'email_dummy_token');
   }
+
+  @override
+  Future<void> sendPasswordReset({required String email}) async {
+    // no-op for local prefs auth
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    // no-op for local prefs auth
+  }
+
+  @override
+  Stream<dynamic> get onAuthStateChanged => const Stream.empty();
 }

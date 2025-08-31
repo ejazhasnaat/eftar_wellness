@@ -13,4 +13,9 @@ class DevEmailVerificationService implements EmailVerificationService {
   }) async {
     log('[DEV MAIL] To: $email | Code: $code');
   }
+
+  @override
+  Future<void> verify({required String email, required String code}) async {
+    // In dev, verification handled locally; no-op.
+  }
 }
