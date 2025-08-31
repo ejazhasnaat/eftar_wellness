@@ -41,6 +41,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         id: user.id,
         name: _name.text.trim(),
         email: user.email,
+        passwordHash: user.passwordHash,
+        emailVerified: user.emailVerified,
         createdAt: user.createdAt,
         updatedAt: DateTime.now(),
       ));

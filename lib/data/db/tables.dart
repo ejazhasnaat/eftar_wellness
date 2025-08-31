@@ -4,6 +4,8 @@ class Users extends Table {
   TextColumn get id => text()(); // UUID
   TextColumn get name => text()();
   TextColumn get email => text().unique()();
+  TextColumn get passwordHash => text()();
+  BoolColumn get emailVerified => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   @override

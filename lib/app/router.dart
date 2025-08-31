@@ -18,7 +18,7 @@ import 'package:eftar_wellness/features/profile/presentation/profile_edit_screen
 /// Builds the app router. Paths and screens preserved deliberately.
 GoRouter buildRouter() {
   return GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/auth/splash',
     routes: <RouteBase>[
       // Home & settings
       GoRoute(

@@ -10,6 +10,12 @@ class UserRepositoryImpl implements UserRepository {
   Stream<List<User>> watchAll() => _dao.watchAll();
 
   @override
+  Future<User?> getByEmail(String email) => _dao.getByEmail(email);
+
+  @override
+  Future<User?> getById(String id) => _dao.getById(id);
+
+  @override
   Future<void> save(User row) => _dao.upsert(row);
 
   @override

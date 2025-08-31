@@ -7,8 +7,6 @@ import 'dart:io';
 /// with the application.
 class AppConfig {
   AppConfig({
-    required this.supabaseUrl,
-    required this.supabaseAnonKey,
     this.llmProvider,
     this.openaiApiKey,
     this.openaiEmbeddingsModel,
@@ -19,12 +17,6 @@ class AppConfig {
     this.vectorDbIndex,
     this.googleMapsApiKey,
   });
-
-  /// Supabase project URL.
-  final String supabaseUrl;
-
-  /// Supabase anonymous key allowing client-side access with RLS.
-  final String supabaseAnonKey;
 
   /// Preferred LLM provider (e.g. openai, anthropic).
   final String? llmProvider;
@@ -47,8 +39,6 @@ class AppConfig {
   factory AppConfig.fromEnv() {
     final env = Platform.environment;
     return AppConfig(
-      supabaseUrl: env['SUPABASE_URL'] ?? '',
-      supabaseAnonKey: env['SUPABASE_ANON_KEY'] ?? '',
       llmProvider: env['LLM_PROVIDER'],
       openaiApiKey: env['OPENAI_API_KEY'],
       openaiEmbeddingsModel: env['OPENAI_EMBEDDINGS_MODEL'],

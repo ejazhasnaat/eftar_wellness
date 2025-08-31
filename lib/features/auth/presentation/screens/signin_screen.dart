@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:eftar_wellness/features/auth/application/auth_controller.dart';
-import 'package:eftar_wellness/features/auth/presentation/widgets/social_buttons.dart';
 import 'package:eftar_wellness/app/theme/app_theme.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
@@ -39,26 +38,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('$e')));
       }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _doGoogle() async {
-    setState(() => _busy = true);
-    try {
-      await ref.read(authControllerProvider).signInWithGoogle();
-      if (mounted) context.go('/home');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _doApple() async {
-    setState(() => _busy = true);
-    try {
-      await ref.read(authControllerProvider).signInWithApple();
-      if (mounted) context.go('/home');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -119,10 +98,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  SocialButtons(onGoogle: _doGoogle, onApple: _doApple, enabled: !_busy),
-                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

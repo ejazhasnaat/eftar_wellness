@@ -11,6 +11,12 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   Future<List<User>> getAll() => select(users).get();
   Stream<List<User>> watchAll() => select(users).watch();
 
+  Future<User?> getByEmail(String email) =>
+      (select(users)..where((t) => t.email.equals(email))).getSingleOrNull();
+
+  Future<User?> getById(String id) =>
+      (select(users)..where((t) => t.id.equals(id))).getSingleOrNull();
+
   Future<void> upsert(User row) => into(users).insertOnConflictUpdate(row);
 
   Future<void> deleteById(String id) =>

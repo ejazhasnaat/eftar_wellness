@@ -1,35 +1,6 @@
 // lib/features/auth/domain/auth_repository.dart
-import 'package:eftar_wellness/features/auth/domain/user_path.dart';
-
 abstract class AuthRepository {
   Future<bool> isSignedIn();
+  Future<void> setSignedInUser(String userId);
   Future<void> signOut();
-
-  Future<void> signInWithGoogle();
-  Future<void> signInWithApple();
-
-  Future<String> signUpWithEmail({
-    required String name,
-    required String email,
-    required String password,
-    String? phone,
-    String? city,
-    String? country,
-    required UserPath path,
-  });
-
-  Future<void> signInWithEmail({
-    required String email,
-    required String password,
-  });
-
-  Future<void> sendPasswordReset({required String email});
-
-  Future<void> resetPassword({
-    required String email,
-    required String code,
-    required String newPassword,
-  });
-
-  Stream<dynamic> get onAuthStateChanged;
 }

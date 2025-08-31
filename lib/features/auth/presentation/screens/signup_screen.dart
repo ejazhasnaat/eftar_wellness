@@ -55,6 +55,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           false;
       if (!mounted) return;
       if (ok) {
+        await ref.read(authControllerProvider).signInWithEmail(
+              email: _email.text.trim(),
+              password: _password.text,
+            );
         handlePostSignup(context, isExpert: _path == UserPath.expert);
       }
     } catch (e) {

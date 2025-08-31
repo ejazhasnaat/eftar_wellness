@@ -36,7 +36,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       setState(() => _codeSent = true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Check console for the 6-digit code')),
+          const SnackBar(content: Text('Verification code sent')),
         );
       }
     } catch (e) {

@@ -13,11 +13,16 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_open());
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {},
+        onUpgrade: (m, from, to) async {
+          if (from == 1) {
+            await m.addColumn(users, users.passwordHash);
+            await m.addColumn(users, users.emailVerified);
+          }
+        },
       );
 }
 

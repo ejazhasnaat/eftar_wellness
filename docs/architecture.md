@@ -101,17 +101,22 @@ Example:
 ```dart
 // domain/auth_repository.dart
 abstract class AuthRepository {
-  Future<void> signInWithEmail(String email, String password);
+  Future<bool> isSignedIn();
+  Future<void> setSignedInUser(String id);
 }
 
-// infrastructure/auth_repository_prefs.dart
-class AuthRepositoryPrefs implements AuthRepository {
+// infrastructure/auth_repository_local.dart
+class AuthRepositoryLocal implements AuthRepository {
   final SharedPreferences prefs;
-  AuthRepositoryPrefs(this.prefs);
+  AuthRepositoryLocal(this.prefs);
 
   @override
-  Future<void> signInWithEmail(String email, String password) async {
-    // save locally or call API
+  Future<bool> isSignedIn() async =>
+      (prefs.getString('auth_token') ?? '').isNotEmpty;
+
+  @override
+  Future<void> setSignedInUser(String id) async {
+    await prefs.setString('auth_token', id);
   }
 }
 ```

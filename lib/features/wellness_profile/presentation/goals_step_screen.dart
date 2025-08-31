@@ -160,8 +160,11 @@ class _GoalsStepScreenState extends ConsumerState<GoalsStepScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton(
-                onPressed: () => context.push('/onboard/wellness/review'),
-                child: const Text('Next'),
+                onPressed: () async {
+                  await n.submit();
+                  context.go('/home');
+                },
+                child: const Text('Finish'),
               ),
             ),
           ]),
